@@ -6,6 +6,9 @@ import os
 import skimage.io
 model_folder = '../../models/'
 
+import caffe
+from caffe.proto import caffe_pb2
+import google.protobuf as pb2
 
 
 # Run with: python predict_resnet.py 1466485849_resnet 194 9
@@ -55,7 +58,7 @@ if __name__ == "__main__":
     lasagne.layers.set_all_param_values(network, param_values)
 
     print "Defining updates.."
-    train_fn, val_fn, l_r = resnet.define_updates(network, input_var, target_var)
+    #train_fn, val_fn, l_r = resnet.define_updates(network, input_var, target_var)
 
     in_pattern = '/media/diskB/guido/luna16/candidates_v2_0.5mm_96x96_xy_xz_yz/subset[{}]/*/*.pkl.gz'.format(subsets)
     filenames = glob(in_pattern)
@@ -65,7 +68,8 @@ if __name__ == "__main__":
 
     test_im = np.zeros((64,64))
     n_testtime_augmentation = len(augment.testtime_augmentation(test_im, 0)[0])
-
+    #sovler=caffe.SGDSolver('models/solver.prototxt')#Owen Add
+    caffe_net = caffe.Net('./wide_resnet.org_run.prototxt', caffe.TEST)
     def get_images_with_filenames(filenames):
         inputs, targets = load_images(filenames, deterministic=True)
 
@@ -106,7 +110,12 @@ if __name__ == "__main__":
     for i, batch in enumerate(tqdm(gen)):
         inputs, targets, fnames = batch
         targets = np.array(np.argmax(targets, axis=1), dtype=np.int32)
-        err, l2_loss, acc, predictions, predictions_raw = val_fn(inputs, targets)
+        caffe_net.blobs['data'].data[...] = data.astype(np.float32, copy=False)
+        caffe_net.blobs['label'].data[...] = targets.astype(np.float32, copy=False)
+        blob_out = caffe_net.forward()
+
+        #err, l2_loss, acc, predictions, predictions_raw = val_fn(inputs, targets)
+        #err, l2_loss, acc, predictions, predictions_raw = caffe.forward()
         err_total += err
         acc_total += acc
         all_probabilities += list(predictions_raw)

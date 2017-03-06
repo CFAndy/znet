@@ -1,16 +1,31 @@
 name: "UNet"
+
 layer {
-  name: 'data'
-  type: 'Data'
-  top: 'data'
-  top: 'label'
+  name: "input-data"
+  type: "Python"
+  top: "data"
+  top: "label"
   include {
-    phase: TRAIN
+     phase: TRAIN
   }
-  transform_param {
+  python_param {
+    module: 'unet.datalayer'
+    layer: 'DataLayer'
   }
-  data_param {
-    batch_size: 1
+}
+
+
+layer {
+  name: "input-data"
+  type: "Python"
+  top: "data"
+  top: "label"
+  include {
+     phase: TEST
+  }
+  python_param {
+    module: 'unet.datalayer'
+    layer: 'ValDataLayer'
   }
 }
 
@@ -814,6 +829,7 @@ layer {
     } 
 }
 
+
 # score layer
 layer {
     bottom: "_conv0_2"
@@ -836,7 +852,7 @@ layer {
     bottom: "label"
     top: "loss"
     name: "loss"
-    type: SOFTMAX_LOSS
+    type: SoftmaxWithLoss
     loss_param {
         ignore_label: 2
     }
@@ -844,6 +860,28 @@ layer {
         phase: TRAIN
     }
 }
+
+layer {
+      name: "prob"
+      bottom: "score"
+      top: "prob"
+      type: "Softmax"
+      include {
+        phase: TEST
+      }
+}
+
+layer {
+  name: "top1"
+  type: "Accuracy"
+  bottom: "prob"
+  bottom: "label"
+  top: "top1"
+  include {
+     phase: TEST
+  }
+}
+
 
 
 

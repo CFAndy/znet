@@ -6,7 +6,9 @@ import pandas as pd
 sys.path.append('../')
 import subset
 
-
+import caffe
+from caffe.proto import caffe_pb2
+import google.protobuf as pb2
 
 if P.ARCHITECTURE == 'unet':
     sys.path.append('./unet')
@@ -34,6 +36,8 @@ def fr3dnet_dataset(subset_nr,df,name_per_subset):
     labels = cands.values[:,4]
     path_names = [P.DATA_FOLDER + 'subset{0}/{1}.mhd'.format(subset_nr,y) for y in names]
     return zip(path_names,coords,labels)
+
+
 if __name__ == "__main__":
 
     np.random.seed(0)
@@ -57,21 +61,24 @@ if __name__ == "__main__":
         trainer.train(train_splits, filenames_val, generator_train, generator_val)
 
     elif P.ARCHITECTURE == 'resnet':
-        from functools import partial
+        #from functools import partial
+        #X_train = glob.glob(P.FILENAMES_TRAIN)
+        #X_val = glob.glob(P.FILENAMES_VALIDATION)
 
-        X_train = glob.glob(P.FILENAMES_TRAIN)
-        X_val = glob.glob(P.FILENAMES_VALIDATION)
+        #print "N Train", len(X_train)
+        #print "N Val", len(X_val)
 
-        print "N Train", len(X_train)
-        print "N Val", len(X_val)
+        #assert len(X_train)+len(X_val) != 0
+        #print ("data",P.FILENAMES_TRAIN,P.FILENAMES_VALIDATION)
+        #print (type(X_val))
+        #print (X_val[0])
+        #train_generator = dataset_2D.load_images
+        #validation_generator = partial(dataset_2D.load_images, deterministic=True)
 
-        assert len(X_train)+len(X_val) != 0
-
-        train_generator = dataset_2D.load_images
-        validation_generator = partial(dataset_2D.load_images, deterministic=True)
-
-        trainer = ResNetTrainer()
-        trainer.train(train_generator, X_train, validation_generator, X_val)
+        #trainer = ResNetTrainer()
+        #trainer.train(train_generator, X_train, validation_generator, X_val)
+        sovler=caffe.SGDSolver('models/solver.prototxt')
+        sovler.step(18500)
 
     elif P.ARCHITECTURE == "fr3dnet":
         df = pd.read_csv("../../data/candidates_v2.csv")
