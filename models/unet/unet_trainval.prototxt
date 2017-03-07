@@ -9,11 +9,10 @@ layer {
      phase: TRAIN
   }
   python_param {
-    module: 'unet.datalayer'
-    layer: 'DataLayer'
+    module: "unet.datalayer"
+    layer: "DataLayer"
   }
 }
-
 
 layer {
   name: "input-data"
@@ -24,10 +23,11 @@ layer {
      phase: TEST
   }
   python_param {
-    module: 'unet.datalayer'
-    layer: 'ValDataLayer'
+    module: "unet.datalayer"
+    layer: "ValDataLayer"
   }
 }
+
 
 ## contraction
 # contraction 0
@@ -65,7 +65,7 @@ layer {
     convolution_param {
         num_output: 64
         kernel_size: 3
-        pad: 1 #unlike znet solution, I set pad = 1 here
+        pad: 1
         stride: 1
         weight_filler {
           type: "msra"
@@ -104,7 +104,7 @@ layer {
     convolution_param {
         num_output: 128
         kernel_size: 3
-        pad: 1 #unlike znet solution, I set pad = 1 here
+        pad: 1
         stride: 1
         weight_filler {
           type: "msra"
@@ -130,7 +130,7 @@ layer {
     convolution_param {
         num_output: 128
         kernel_size: 3
-        pad: 1 #unlike znet solution, I set pad = 1 here
+        pad: 1
         stride: 1
         weight_filler {
           type: "msra"
@@ -169,7 +169,7 @@ layer {
     convolution_param {
         num_output: 256
         kernel_size: 3
-        pad: 1 #unlike znet solution, I set pad = 1 here
+        pad: 1
         stride: 1
         weight_filler {
           type: "msra"
@@ -195,7 +195,7 @@ layer {
     convolution_param {
         num_output: 256
         kernel_size: 3
-        pad: 1 #unlike znet solution, I set pad = 1 here
+        pad: 1
         stride: 1
         weight_filler {
           type: "msra"
@@ -234,7 +234,7 @@ layer {
     convolution_param {
         num_output: 512
         kernel_size: 3
-        pad: 1 #unlike znet solution, I set pad = 1 here
+        pad: 1
         stride: 1
         weight_filler {
           type: "msra"
@@ -260,7 +260,7 @@ layer {
     convolution_param {
         num_output: 512
         kernel_size: 3
-        pad: 1 #unlike znet solution, I set pad = 1 here
+        pad: 1
         stride: 1
         weight_filler {
           type: "msra"
@@ -293,13 +293,13 @@ layer {
 # contraction 4
 layer {
     bottom: "pool3"
-    top: "conv3_1"
-    name: "conv3_1"
+    top: "conv4_1"
+    name: "conv4_1"
     type: "Convolution"
     convolution_param {
         num_output: 1024
         kernel_size: 3
-        pad: 1 #unlike znet solution, I set pad = 1 here
+        pad: 1
         stride: 1
         weight_filler {
           type: "msra"
@@ -325,7 +325,7 @@ layer {
     convolution_param {
         num_output: 1024
         kernel_size: 3
-        pad: 1 #unlike znet solution, I set pad = 1 here
+        pad: 1
         stride: 1
         weight_filler {
           type: "msra"
@@ -350,7 +350,7 @@ layer {
     bottom: "conv4_2"
     top: "deconv3"
     name: "deconv3"
-    type: DECONVOLUTION
+    type: "Deconvolution"
     convolution_param {
         num_output: 512
         pad: 0
@@ -373,10 +373,10 @@ layer {
 }
 
 layer {
-    bottom: "pool3"
+    bottom: "conv3_2"
     top: "dropout3"
     name: "dropout3"
-    type: DROPOUT  # should be spatial dropout here?
+    type: "Dropout"  # should be spatial dropout here?
     dropout_param {
       dropout_ratio: 0.5
     }
@@ -390,7 +390,21 @@ layer {
     bottom: "deconv3"
     top: "crop3"
     name: "crop3"
-    type: CROP
+    type: "Crop"
+    include: {
+      phase: TRAIN
+    }
+}
+
+layer {
+    bottom: "conv3_2"
+    bottom: "deconv3"
+    top: "crop3"
+    name: "crop3"
+    type: "Crop"
+    include: {
+      phase: TEST
+    }
 }
 
 layer {
@@ -398,7 +412,7 @@ layer {
     bottom: "deconv3"
     top: "bridge3"
     name: "bridge3"
-    type: CONCAT
+    type: "Concat"
 }
 
 layer {
@@ -409,7 +423,7 @@ layer {
     convolution_param {
         num_output: 512
         kernel_size: 3
-        pad: 1 #unlike znet solution, I set pad = 1 here
+        pad: 1
         stride: 1
         weight_filler {
           type: "msra"
@@ -431,7 +445,7 @@ layer {
     bottom: "_conv3_1"
     top: "_dropout3"
     name: "_dropout3"
-    type: DROPOUT
+    type: "Dropout"
     dropout_param {
       dropout_ratio: 0.25
     }
@@ -448,11 +462,33 @@ layer {
     convolution_param {
         num_output: 512
         kernel_size: 3
-        pad: 1 #unlike znet solution, I set pad = 1 here
+        pad: 1
         stride: 1
         weight_filler {
           type: "msra"
         }
+    }
+    include: {
+      phase: TRAIN
+    }
+}
+
+layer {
+    bottom: "_conv3_1"
+    top: "_conv3_2"
+    name: "_conv3_2"
+    type: "Convolution"
+    convolution_param {
+        num_output: 512
+        kernel_size: 3
+        pad: 1
+        stride: 1
+        weight_filler {
+          type: "msra"
+        }
+    }
+    include: {
+      phase: TEST
     }
 }
 
@@ -471,7 +507,7 @@ layer {
     bottom: "_conv3_2"
     top: "deconv2"
     name: "deconv2"
-    type: DECONVOLUTION
+    type: "Deconvolution"
     convolution_param {
         num_output: 256
         pad: 0
@@ -494,10 +530,10 @@ layer {
 }
 
 layer {
-    bottom: "pool2"
+    bottom: "conv2_2"
     top: "dropout2"
     name: "dropout2"
-    type: DROPOUT  # should be spatial dropout here?
+    type: "Dropout"  # should be spatial dropout here?
     dropout_param {
       dropout_ratio: 0.5
     }
@@ -511,7 +547,21 @@ layer {
     bottom: "deconv2"
     top: "crop2"
     name: "crop2"
-    type: CROP
+    type: "Crop"
+    include: {
+      phase: TRAIN
+    }
+}
+
+layer {
+    bottom: "conv2_2"
+    bottom: "deconv2"
+    top: "crop2"
+    name: "crop2"
+    type: "Crop"
+    include: {
+      phase: TEST
+    }
 }
 
 layer {
@@ -519,7 +569,7 @@ layer {
     bottom: "deconv2"
     top: "bridge2"
     name: "bridge2"
-    type: CONCAT
+    type: "Concat"
 }
 
 layer {
@@ -552,7 +602,7 @@ layer {
     bottom: "_conv2_1"
     top: "_dropout2"
     name: "_dropout2"
-    type: DROPOUT
+    type: "Dropout"
     dropout_param {
       dropout_ratio: 0.25
     }
@@ -575,6 +625,28 @@ layer {
           type: "msra"
         }
     }
+    include: {
+      phase: TRAIN
+    }
+}
+
+layer {
+    bottom: "_conv2_1"
+    top: "_conv2_2"
+    name: "_conv2_2"
+    type: "Convolution"
+    convolution_param {
+        num_output: 256
+        kernel_size: 3
+        pad: 1 #unlike znet solution, I set pad = 1 here
+        stride: 1
+        weight_filler {
+          type: "msra"
+        }
+    }
+    include: {
+      phase: TEST
+    }
 }
 
 layer {
@@ -592,7 +664,7 @@ layer {
     bottom: "_conv2_2"
     top: "deconv1"
     name: "deconv1"
-    type: DECONVOLUTION
+    type: "Deconvolution"
     convolution_param {
         num_output: 128
         pad: 0
@@ -615,10 +687,10 @@ layer {
 }
 
 layer {
-    bottom: "pool1"
+    bottom: "conv1_2"
     top: "dropout1"
     name: "dropout1"
-    type: DROPOUT  # should be spatial dropout here?
+    type: "Dropout"  # should be spatial dropout here?
     dropout_param {
       dropout_ratio: 0.5
     }
@@ -632,7 +704,21 @@ layer {
     bottom: "deconv1"
     top: "crop1"
     name: "crop1"
-    type: CROP
+    type: "Crop"
+    include: {
+      phase: TRAIN
+    }
+}
+
+layer {
+    bottom: "conv1_2"
+    bottom: "deconv1"
+    top: "crop1"
+    name: "crop1"
+    type: "Crop"
+    include: {
+      phase: TEST
+    }
 }
 
 layer {
@@ -640,7 +726,7 @@ layer {
     bottom: "deconv1"
     top: "bridge1"
     name: "bridge1"
-    type: CONCAT
+    type: "Concat"
 }
 
 layer {
@@ -673,7 +759,7 @@ layer {
     bottom: "_conv1_1"
     top: "_dropout1"
     name: "_dropout1"
-    type: DROPOUT
+    type: "Dropout"
     dropout_param {
       dropout_ratio: 0.25
     }
@@ -696,6 +782,28 @@ layer {
           type: "msra"
         }
     }
+    include: {
+      phase: TRAIN
+    }
+}
+
+layer {
+    bottom: "_conv1_1"
+    top: "_conv1_2"
+    name: "_conv1_2"
+    type: "Convolution"
+    convolution_param {
+        num_output: 128
+        kernel_size: 3
+        pad: 1 #unlike znet solution, I set pad = 1 here
+        stride: 1
+        weight_filler {
+          type: "msra"
+        }
+    }
+    include: {
+      phase: TEST
+    }
 }
 
 layer {
@@ -713,7 +821,7 @@ layer {
     bottom: "_conv1_2"
     top: "deconv0"
     name: "deconv0"
-    type: DECONVOLUTION
+    type: "Deconvolution"
     convolution_param {
         num_output: 64
         pad: 0
@@ -736,10 +844,10 @@ layer {
 }
 
 layer {
-    bottom: "pool0"
+    bottom: "conv0_2"
     top: "dropout0"
     name: "dropout0"
-    type: DROPOUT  # should be spatial dropout here?
+    type: "Dropout"  # should be spatial dropout here?
     dropout_param {
       dropout_ratio: 0.5
     }
@@ -753,7 +861,21 @@ layer {
     bottom: "deconv0"
     top: "crop0"
     name: "crop0"
-    type: CROP
+    type: "Crop"
+    include: {
+      phase: TRAIN
+    }
+}
+
+layer {
+    bottom: "conv0_2"
+    bottom: "deconv0"
+    top: "crop0"
+    name: "crop0"
+    type: "Crop"
+    include: {
+      phase: TEST
+    }
 }
 
 layer {
@@ -761,7 +883,7 @@ layer {
     bottom: "deconv0"
     top: "bridge0"
     name: "bridge0"
-    type: CONCAT
+    type: "Concat"
 }
 
 layer {
@@ -794,7 +916,7 @@ layer {
     bottom: "_conv0_1"
     top: "_dropout0"
     name: "_dropout0"
-    type: DROPOUT
+    type: "Dropout"
     dropout_param {
       dropout_ratio: 0.25
     }
@@ -816,6 +938,28 @@ layer {
         weight_filler {
           type: "msra"
         }
+    }
+    include: {
+      phase: TRAIN
+    }
+}
+
+layer {
+    bottom: "_conv0_1"
+    top: "_conv0_2"
+    name: "_conv0_2"
+    type: "Convolution"
+    convolution_param {
+        num_output: 64
+        kernel_size: 3
+        pad: 1 #unlike znet solution, I set pad = 1 here
+        stride: 1
+        weight_filler {
+          type: "msra"
+        }
+    }
+    include: {
+      phase: TEST
     }
 }
 
@@ -852,9 +996,9 @@ layer {
     bottom: "label"
     top: "loss"
     name: "loss"
-    type: SoftmaxWithLoss
+    type: "SoftmaxWithLoss"
     loss_param {
-        ignore_label: 2
+        ignore_label: -10
     }
     include: {
         phase: TRAIN

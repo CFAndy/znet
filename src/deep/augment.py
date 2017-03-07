@@ -2,17 +2,18 @@ from params import params as P
 import numpy as np
 
 
-try:
-    import cv2
-    CV2_AVAILABLE=True
-    print "OpenCV 2 available, using that for augmentation"
-    from scipy.ndimage.interpolation import rotate, shift, zoom, affine_transform
-    from skimage.transform import warp, AffineTransform
-except:
-    from scipy.ndimage.interpolation import rotate, shift, zoom, affine_transform
-    from skimage.transform import warp, AffineTransform
-    CV2_AVAILABLE=False
-    print "OpenCV 2 NOT AVAILABLE, using skimage/scipy.ndimage instead"
+#try:
+#    import cv2
+#    CV2_AVAILABLE=True
+#    print "OpenCV 2 available, using that for augmentation"
+#    from scipy.ndimage.interpolation import rotate, shift, zoom, affine_transform
+#    from skimage.transform import warp, AffineTransform
+#except:
+
+from scipy.ndimage.interpolation import rotate, shift, zoom, affine_transform
+from skimage.transform import warp, AffineTransform
+CV2_AVAILABLE=False
+print "OpenCV 2 NOT AVAILABLE, using skimage/scipy.ndimage instead"
 
 def augment(images):
     pixels = images[0].shape[1]
@@ -28,7 +29,9 @@ def augment(images):
     zoom_factor = np.random.uniform(*P.AUGMENTATION_PARAMS['zoom_range'])
     #zoom_factor = 1 + (zoom_f/2-zoom_f*np.random.random())
     if CV2_AVAILABLE:
+        print center, rotation_degrees, zoom_factor
         M = cv2.getRotationMatrix2D((center, center), rotation_degrees, zoom_factor)
+        print "done"
         M[0, 2] += shift_x
         M[1, 2] += shift_y
 
