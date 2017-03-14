@@ -1,5 +1,7 @@
 import sys
 import time
+import os
+
 from ConfigParser import ConfigParser
 import StringIO
 
@@ -94,4 +96,5 @@ class Params():
         with open(filepath, 'w') as f:
             self.CONFIG.write(f)
 
-params = Params(['/home/matrix/znet/config/default.ini'] + ['/home/matrix/znet/config/unet_splits/split01.ini'])
+cur_dir = os.path.dirname(os.path.abspath(__file__))
+unet_params = Params([os.path.join(cur_dir, "../../config/default.ini")] + [os.path.join(cur_dir, '../../config/unet_splits/split01.ini')])

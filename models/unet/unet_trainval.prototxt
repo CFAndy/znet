@@ -1000,19 +1000,16 @@ layer {
     loss_param {
         ignore_label: -10
     }
-    include: {
-        phase: TRAIN
-    }
 }
 
 layer {
-      name: "prob"
-      bottom: "score"
-      top: "prob"
-      type: "Softmax"
-      include {
+    name: "prob"
+    type: "Softmax"
+    bottom: "score"
+    top: "prob"
+    include {
         phase: TEST
-      }
+    }
 }
 
 layer {
@@ -1021,12 +1018,11 @@ layer {
   bottom: "prob"
   bottom: "label"
   top: "top1"
+  accuracy_param {
+      ignore_label: -10
+  }
   include {
      phase: TEST
   }
 }
-
-
-
-
 

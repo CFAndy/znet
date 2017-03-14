@@ -1,18 +1,14 @@
+import _init_paths
+
 import caffe
 import numpy as np
 import sys
 import glob
 
-sys.path.append('../')
-from params import params as P
-import dataset
+import udataset
+from utils import output_size_for_input
 
-def output_size_for_input(in_size, depth):
-    for _ in range(depth - 1):
-        in_size = in_size // 2
-    for _ in range(depth - 1):
-        in_size = in_size * 2
-    return in_size
+from params import unet_params as P
 
 NET_DEPTH = P.DEPTH # Default 5
 INPUT_SIZE = P.INPUT_SIZE # Default 512
@@ -20,7 +16,7 @@ OUTPUT_SIZE = output_size_for_input(INPUT_SIZE, NET_DEPTH)
 
 class DataLayer(caffe.Layer):
     def read_data(self):
-        l, t, w, _ = dataset.load_images(self.train_data[self.index : self.index + self.batch_size])
+        l, t, w, _ = udataset.load_images(self.train_data[self.index : self.index + self.batch_size])
         self.index += self.batch_size
         if self.index + self.batch_size > len(self.train_data):
             self.index = 0
@@ -33,7 +29,7 @@ class DataLayer(caffe.Layer):
         np.random.seed(0)
         # print P.FILENAMES_TRAIN
         file_names = glob.glob(P.FILENAMES_TRAIN)        
-        train_splits = dataset.train_splits_by_z(file_names, 0.3, P.N_EPOCHS)
+        train_splits = udataset.train_splits_by_z(file_names, 0.3, P.N_EPOCHS)
         print "train number per epoch: ", len(train_splits[0])
         self.train_data = [item for sublist in train_splits for item in sublist]
         print "total train number: ", len(self.train_data)
@@ -54,11 +50,11 @@ class DataLayer(caffe.Layer):
             top[0].reshape(data.shape[0], P.CHANNELS, INPUT_SIZE, INPUT_SIZE)
             top[1].reshape(label.shape[0], 1, OUTPUT_SIZE, OUTPUT_SIZE)
             print ('reshape ', label.shape[0])
-            top[0].data[...] = data.astype(np.float32, copy=False)
-            top[1].data[...] = label.astype(np.float32, copy=False)
+            top[0].data[...] = data.astype(np.float32, copy = False)
+            top[1].data[...] = label.astype(np.float32, copy = False)
         else:
-            top[0].data[...] = data.astype(np.float32, copy=False)
-            top[1].data[...] = label.astype(np.float32, copy=False)
+            top[0].data[...] = data.astype(np.float32, copy = False)
+            top[1].data[...] = label.astype(np.float32, copy = False)
         # print ("read data\n")
         # sys.exit(0)
 
@@ -73,7 +69,7 @@ class DataLayer(caffe.Layer):
 
 class ValDataLayer(caffe.Layer):
     def read_data(self):
-        l, t, w, _ = dataset.load_images(self.data[self.index:self.index + self.batch_size])
+        l, t, w, _ = udataset.load_images(self.data[self.index:self.index + self.batch_size])
         self.index += self.batch_size
         if self.index + self.batch_size > len(self.data):
             self.index = 0
@@ -87,7 +83,7 @@ class ValDataLayer(caffe.Layer):
         self.data = glob.glob(P.FILENAMES_VALIDATION)        
         self.batch_size = P.BATCH_SIZE_VALIDATION
 
-        # print len(self.data)
+        print "validation data size: ", len(self.data)
         self.index = 0
         # sys.exit(0)
 
@@ -102,11 +98,11 @@ class ValDataLayer(caffe.Layer):
             top[0].reshape(data.shape[0], P.CHANNELS, INPUT_SIZE, INPUT_SIZE)
             top[1].reshape(label.shape[0], 1, OUTPUT_SIZE, OUTPUT_SIZE)
             print ('reshape ', label.shape[0])
-            top[0].data[...] = data.astype(np.float32, copy=False)
-            top[1].data[...] = label.astype(np.float32, copy=False)
+            top[0].data[...] = data.astype(np.float32, copy = False)
+            top[1].data[...] = label.astype(np.float32, copy = False)
         else:
-            top[0].data[...] = data.astype(np.float32, copy=False)
-            top[1].data[...] = label.astype(np.float32, copy=False)
+            top[0].data[...] = data.astype(np.float32, copy = False)
+            top[1].data[...] = label.astype(np.float32, copy = False)
         # print ("read data\n")
         # sys.exit(0)
 

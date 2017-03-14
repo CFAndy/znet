@@ -1,4 +1,4 @@
-from params import params as P
+from params import unet_params as P
 import numpy as np
 
 

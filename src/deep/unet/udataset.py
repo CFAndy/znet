@@ -1,17 +1,24 @@
 from __future__ import division
+import _init_paths
+
 import os.path
 import numpy as np
-from unet import INPUT_SIZE, OUTPUT_SIZE, output_size_for_input
-import normalize
 import gzip
 import cPickle as pickle
-import loss_weighting
 import skimage.morphology
-from augment import augment
 import time
 import re
+import sys
 
-from params import params as P
+from params import unet_params as P
+from utils import output_size_for_input
+from augment import augment
+import normalize
+import loss_weighting
+
+NET_DEPTH = P.DEPTH # Default 5
+INPUT_SIZE = P.INPUT_SIZE # Default 512
+OUTPUT_SIZE = output_size_for_input(INPUT_SIZE, NET_DEPTH)
 
 _EPSILON = 1e-8
 
@@ -19,22 +26,43 @@ def get_image(filename, deterministic):
     with gzip.open(filename,'rb') as f:
         lung = pickle.load(f)
 
-    truth_filename = filename.replace('lung','nodule')
+    np.set_printoptions(threshold = 'nan')
+    # truth_filename = filename.replace('lung','nodule')
     segmentation_filename = filename.replace('lung','lung_masks')
-    #segmentation_filename = re.sub(r'subset[0-9]','',segmentation_filename)
+    # segmentation_filename = re.sub(r'subset[0-9]','',segmentation_filename)
 
-    if os.path.isfile(truth_filename):
-        with gzip.open(truth_filename,'rb') as f:
-            truth = np.array(pickle.load(f),dtype=np.float32)
-    else:
-        truth = np.zeros_like(lung)
+    # if os.path.isfile(truth_filename):
+    #     with gzip.open(truth_filename,'rb') as f:
+    #        truth = np.array(pickle.load(f),dtype=np.float32)
+    # else:
+    #    truth = np.zeros_like(lung)
+    # get nodule through bounding box
+    truth_filename = filename.replace('lung','bbox')
+    truth = np.zeros_like(lung)
+    # print np.sum(truth)
+    # print truth.shape
+    # print truth_filename
+    with gzip.open(truth_filename,'rb') as f:
+        bb = pickle.load(f)[0]
+        # print len(bb)
+        for i in xrange(len(bb)):
+            y1, x1 = bb[i][0:2]
+            y2, x2 = bb[i][2:4]
+            x1 = int(x1)
+            y1 = int(y1)
+            x2 = int(x2 + 1)
+            y2 = int(y2 + 1)
+            # print x1, y1, x2, y2
+            truth[x1:x2,y1:y2] = 1
 
     if os.path.isfile(segmentation_filename):
         with gzip.open(segmentation_filename,'rb') as f:
-            outside = np.where(pickle.load(f)>0,0,1)
+            outside = np.where(pickle.load(f) > 0, 0, 1)
     else:
-        outside = np.where(lung==0,1,0)
-        print 'lung not found'
+        outside = np.where(lung == 0, 1, 0)
+        # print outside
+        # print 'lung not found'
+    # print np.sum(truth), np.sum(outside)
 
     if P.ERODE_SEGMENTATION > 0:
         kernel = skimage.morphology.disk(P.ERODE_SEGMENTATION)
@@ -59,10 +87,10 @@ def get_image(filename, deterministic):
     outside = np.array(np.round(outside),dtype=np.int64)
 
     #Set label of outside pixels to -10
-    truth = truth - (outside*10)
+    truth = truth - (outside * 10)
 
-    lung = lung*(1-outside)
-    lung = lung-outside*3000
+    lung = lung * (1 - outside)
+    lung = lung - outside * 3000
 
     if P.INPUT_SIZE > 0:
         lung = crop_or_pad(lung, INPUT_SIZE, -3000)
@@ -75,17 +103,17 @@ def get_image(filename, deterministic):
         outside = crop_or_pad(outside, out_size, 1)
 
     lung = normalize.normalize(lung)
-    lung = np.expand_dims(np.expand_dims(lung, axis=0),axis=0)
+    lung = np.expand_dims(np.expand_dims(lung, axis = 0), axis = 0)
 
     if P.ZERO_CENTER:
         lung = lung - P.MEAN_PIXEL
 
-    truth = np.array(np.expand_dims(np.expand_dims(truth, axis=0),axis=0),dtype=np.int64)
+    truth = np.array(np.expand_dims(np.expand_dims(truth, axis = 0), axis = 0), dtype = np.int64)
     return lung, truth
 
 def crop_or_pad(image, desired_size, pad_value):
     if image.shape[0] < desired_size:
-        offset = int(np.ceil((desired_size-image.shape[0])/2))
+        offset = int(np.ceil((desired_size - image.shape[0]) / 2))
         image = np.pad(image, offset, 'constant', constant_values=pad_value)
 
     if image.shape[0] > desired_size:
@@ -117,8 +145,9 @@ def get_scan_name(filename):
 def train_splits_by_z(filenames, data_resolution=0.5, n_splits=None):
     import pandas as pd
 
+    cur_dir = os.path.dirname(os.path.abspath(__file__))
     zspacing_file = os.path.join(cur_dir, "../../../../data/luna2016/imagename_zspacing.csv")
-    resolution_of_scan = pd.read_csv(zspacing_file, header=None,names=['filename','spacing'],index_col=False)
+    resolution_of_scan = pd.read_csv(zspacing_file, header=None, names=['filename','spacing'], index_col=False)
 
 
     scan_names = set(map(get_scan_name, filenames))
@@ -126,6 +155,7 @@ def train_splits_by_z(filenames, data_resolution=0.5, n_splits=None):
     scan_filenames = []
     for scan in scan_names:
         scan_filenames.append(filter(lambda x: scan in x, filenames))
+    # print len(scan_filenames)
 
     split_per_scan = [int(np.round(r/data_resolution)) for r in resolutions] #Amount of splits to divide the filenames over
     random_offsets = [np.random.permutation(range(x)) for x in split_per_scan]
@@ -137,7 +167,7 @@ def train_splits_by_z(filenames, data_resolution=0.5, n_splits=None):
 
     for i, s in enumerate(splits):
         for r, scan, filenames_in_scan, n, offset in zip(resolutions, scan_names, scan_filenames, split_per_scan, random_offsets):
-            #n = int(np.round(r/data_resolution))
+            # n = int(np.round(r/data_resolution))
             start = offset[i%n]
             s += filenames_in_scan[start%n::n]
 

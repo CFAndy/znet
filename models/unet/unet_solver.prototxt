@@ -1,7 +1,7 @@
-net: "/home/matrix/znet/models/unet/unet_trainval.prototxt"
+net: "../../../models/unet/unet_trainval.prototxt"
 solver_mode: CPU
 type: "Nesterov"
-test_iter: 1550
+test_iter: 518
 test_interval: 1550
 test_initialization: false
 test_compute_loss: true
