@@ -29,9 +29,10 @@ def get_image(filename, deterministic):
     with gzip.open(filename,'rb') as f:
         lung = pickle.load(f)
 
-    truth_filename = filename.replace('lung','nodule')
+    np.set_printoptions(threshold = 'nan')
+    # truth_filename = filename.replace('lung','nodule')
     segmentation_filename = filename.replace('lung','lung_masks')
-    #segmentation_filename = re.sub(r'subset[0-9]','',segmentation_filename)
+    # segmentation_filename = re.sub(r'subset[0-9]','',segmentation_filename)
 
     # if os.path.isfile(truth_filename):
     #     with gzip.open(truth_filename,'rb') as f:
@@ -41,23 +42,30 @@ def get_image(filename, deterministic):
     # get nodule through bounding box
     truth_filename = filename.replace('lung','bbox')
     truth = np.zeros_like(lung)
+    # print np.sum(truth)
+    # print truth.shape
+    # print truth_filename
     with gzip.open(truth_filename,'rb') as f:
         bb = pickle.load(f)[0]
+        # print len(bb)
         for i in xrange(len(bb)):
-            x1, y1 = bb[i][0:2]
-            x2, y2 = bb[i][2:4]
+            y1, x1 = bb[i][0:2]
+            y2, x2 = bb[i][2:4]
             x1 = int(x1)
             y1 = int(y1)
             x2 = int(x2 + 1)
             y2 = int(y2 + 1)
+            # print x1, y1, x2, y2
             truth[x1:x2,y1:y2] = 1
 
     if os.path.isfile(segmentation_filename):
         with gzip.open(segmentation_filename,'rb') as f:
-            outside = np.where(pickle.load(f)>0,0,1)
+            outside = np.where(pickle.load(f) > 0, 0, 1)
     else:
-        outside = np.where(lung==0,1,0)
+        outside = np.where(lung == 0, 1, 0)
+        # print outside
         # print 'lung not found'
+    # print np.sum(truth), np.sum(outside)
 
     if P.ERODE_SEGMENTATION > 0:
         kernel = skimage.morphology.disk(P.ERODE_SEGMENTATION)
@@ -82,10 +90,10 @@ def get_image(filename, deterministic):
     outside = np.array(np.round(outside),dtype=np.int64)
 
     #Set label of outside pixels to -10
-    truth = truth - (outside*10)
+    truth = truth - (outside * 10)
 
-    lung = lung*(1-outside)
-    lung = lung-outside*3000
+    lung = lung * (1 - outside)
+    lung = lung - outside * 3000
 
     if P.INPUT_SIZE > 0:
         lung = crop_or_pad(lung, INPUT_SIZE, -3000)
@@ -98,17 +106,17 @@ def get_image(filename, deterministic):
         outside = crop_or_pad(outside, out_size, 1)
 
     lung = normalize.normalize(lung)
-    lung = np.expand_dims(np.expand_dims(lung, axis=0),axis=0)
+    lung = np.expand_dims(np.expand_dims(lung, axis = 0), axis = 0)
 
     if P.ZERO_CENTER:
         lung = lung - P.MEAN_PIXEL
 
-    truth = np.array(np.expand_dims(np.expand_dims(truth, axis=0),axis=0),dtype=np.int64)
+    truth = np.array(np.expand_dims(np.expand_dims(truth, axis = 0), axis = 0), dtype = np.int64)
     return lung, truth
 
 def crop_or_pad(image, desired_size, pad_value):
     if image.shape[0] < desired_size:
-        offset = int(np.ceil((desired_size-image.shape[0])/2))
+        offset = int(np.ceil((desired_size - image.shape[0]) / 2))
         image = np.pad(image, offset, 'constant', constant_values=pad_value)
 
     if image.shape[0] > desired_size:

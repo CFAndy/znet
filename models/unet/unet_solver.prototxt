@@ -1,10 +1,11 @@
 net: "/home/matrix/znet/models/unet/unet_trainval.prototxt"
 solver_mode: CPU
 type: "Nesterov"
-test_iter: 1000
-test_interval: 4000
+test_iter: 1550
+test_interval: 1550
 test_initialization: false
-display: 20
+test_compute_loss: true
+display: 1550
 average_loss: 40
 base_lr: 0.0001
 lr_policy: "fixed" # "step"
@@ -13,6 +14,6 @@ lr_policy: "fixed" # "step"
 momentum: 0.99
 regularization_type: "L2"
 weight_decay: 1e-5
-max_iter: 1000000
+max_iter: 311061
 snapshot: 40000
 snapshot_prefix: "unet_train"

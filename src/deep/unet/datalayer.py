@@ -20,7 +20,7 @@ OUTPUT_SIZE = output_size_for_input(INPUT_SIZE, NET_DEPTH)
 
 class DataLayer(caffe.Layer):
     def read_data(self):
-        l, t, w, _ = dataset.load_images(self.train_data[self.index:self.index + self.batch_size])
+        l, t, w, _ = dataset.load_images(self.train_data[self.index : self.index + self.batch_size])
         self.index += self.batch_size
         if self.index + self.batch_size > len(self.train_data):
             self.index = 0
@@ -34,8 +34,9 @@ class DataLayer(caffe.Layer):
         # print P.FILENAMES_TRAIN
         file_names = glob.glob(P.FILENAMES_TRAIN)        
         train_splits = dataset.train_splits_by_z(file_names, 0.3, P.N_EPOCHS)
+        print "train number per epoch: ", len(train_splits[0])
         self.train_data = [item for sublist in train_splits for item in sublist]
-        print len(self.train_data)
+        print "total train number: ", len(self.train_data)
 
         self.index = 0
         self.batch_size = P.BATCH_SIZE_TRAIN
@@ -86,7 +87,7 @@ class ValDataLayer(caffe.Layer):
         self.data = glob.glob(P.FILENAMES_VALIDATION)        
         self.batch_size = P.BATCH_SIZE_VALIDATION
 
-        print len(self.data)
+        # print len(self.data)
         self.index = 0
         # sys.exit(0)
 
