@@ -32,7 +32,7 @@ class Params():
 
         self.FILENAMES_TRAIN = cf.get('dataset','filenames_train')
         self.FILENAMES_VALIDATION = cf.get('dataset','filenames_validation')
-        # self.FILENAMES_PREDICTION = cf.get('dataset', 'filenames_prediction')
+        self.FILENAMES_PREDICTION = cf.get('dataset', 'filenames_prediction')
         self.DATA_FOLDER = cf.get('dataset','data_folder')
 
 
@@ -57,7 +57,7 @@ class Params():
 
         self.BATCH_SIZE_TRAIN = cf.getint('updates', 'batch_size_train')
         self.BATCH_SIZE_VALIDATION = cf.getint('updates', 'batch_size_validation')
-        # self.BATCH_SIZE_PREDICTION = cf.getint('updates', 'batch_size_prediction')
+        self.BATCH_SIZE_PREDICTION = cf.getint('updates', 'batch_size_prediction')
         self.N_EPOCHS = cf.getint('updates', 'n_epochs')
 
         # Normalization
@@ -98,3 +98,4 @@ class Params():
 
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 unet_params = Params([os.path.join(cur_dir, "../../config/default.ini")] + [os.path.join(cur_dir, '../../config/unet_splits/split01.ini')])
+wrn_params = Params(["../../config/default.ini"] + ["../../config/resnet56_3_diag.ini"])
