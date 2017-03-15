@@ -30,11 +30,11 @@ class Params():
 
         self.SUBSET = None if cf.get('dataset','subset')=='None' else cf.getint('dataset','subset')
 
-        self.FILENAMES_TRAIN = cf.get('dataset','filenames_train')
-        self.FILENAMES_VALIDATION = cf.get('dataset','filenames_validation')
-        self.FILENAMES_PREDICTION = cf.get('dataset', 'filenames_prediction')
+        cur_dir_ = os.path.dirname(os.path.abspath(__file__))
+        self.FILENAMES_TRAIN = os.path.join(cur_dir_, cf.get('dataset','filenames_train'))
+        self.FILENAMES_VALIDATION = os.path.join(cur_dir_, cf.get('dataset','filenames_validation'))
+        self.FILENAMES_PREDICTION = os.path.join(cur_dir_, cf.get('dataset', 'filenames_prediction'))
         self.DATA_FOLDER = cf.get('dataset','data_folder')
-
 
         # Network
         self.ARCHITECTURE = cf.get('network', 'architecture')
@@ -98,4 +98,4 @@ class Params():
 
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 unet_params = Params([os.path.join(cur_dir, "../../config/default.ini")] + [os.path.join(cur_dir, '../../config/unet_splits/split01.ini')])
-wrn_params = Params(["../../config/default.ini"] + ["../../config/resnet56_3_diag.ini"])
+wrn_params = Params([os.path.join(cur_dir, "../../config/default.ini")] + [os.path.join(cur_dir, "../../config/resnet56_3_diag.ini")])

@@ -1,8 +1,9 @@
 import gzip
 import cPickle as pickle
 import numpy as np
-from normalize import normalize
 
+import _init_paths
+from normalize import normalize
 from params import wrn_params as P
 import augment
 

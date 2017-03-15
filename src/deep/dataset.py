@@ -117,7 +117,7 @@ def get_scan_name(filename):
 def train_splits_by_z(filenames, data_resolution=0.5, n_splits=None):
     import pandas as pd
 
-    zspacing_file = os.path.join(cur_dir, "../../../../data/luna2016/imagename_zspacing.csv")
+    zspacing_file = os.path.join(cur_dir, "./../../data/luna2016/imagename_zspacing.csv")
     resolution_of_scan = pd.read_csv(zspacing_file, header=None,names=['filename','spacing'],index_col=False)
 
 

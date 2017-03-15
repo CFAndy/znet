@@ -2315,7 +2315,7 @@ layer {
   top: "poolblock"
   pooling_param {
     pool:AVE 
-    global_pooling:True
+    global_pooling:true
   }
 }
 layer {

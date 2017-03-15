@@ -1,15 +1,17 @@
 import caffe
 import numpy as np
 import sys
-from params import wrn_params as P
 import glob
-import dataset_2D
+
+from params import wrn_params as P
+import wdataset_2D as dataset_2D
 from parallel import ParallelBatchIterator
 
 n_channels = P.CHANNELS
 PIXELS = P.INPUT_SIZE
 batch_size = P.BATCH_SIZE_TRAIN // 3
-W=1
+W = 1
+
 class DataLayer(caffe.Layer):
     def _shuffle_data(self):
         np.random.shuffle(self.file_false)
@@ -25,7 +27,7 @@ class DataLayer(caffe.Layer):
         return l,t
 
     def setup(self, bottom, top):
-        #print ("set up")
+        # print ("set up")
         file_names = glob.glob(P.FILENAMES_TRAIN)
         self.file_true = filter(lambda x: "True" in x, file_names)
         self.file_false = filter(lambda x: "False" in x, file_names)
