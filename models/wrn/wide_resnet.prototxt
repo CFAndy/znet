@@ -1,5 +1,6 @@
 engine: "MKL2017"
 name: "wrn_384_v8"
+
 layer {
   name: "input-data"
   type: "Python"
@@ -13,7 +14,6 @@ layer {
     layer: 'DataLayer'
   }
 }
-
 
 layer {
   name: "input-data"
@@ -49,6 +49,7 @@ layer {
     }
   }
 }
+
 layer {
   name: "BatchNorm1"
   type: "BatchNorm"
@@ -57,6 +58,7 @@ layer {
   batch_norm_param {
   }
 }
+
 layer {
   bottom: "Convolution1"
   top: "Convolution1"
@@ -64,7 +66,7 @@ layer {
   type: "Scale"
   scale_param {
       bias_term: true
-   }
+  }
 }
 
 layer {
@@ -75,6 +77,7 @@ layer {
   relu_param {
   }
 }
+
 ################
 layer {
   name: "block1_conv"
@@ -96,15 +99,16 @@ layer {
     }
   }
 }
+
 layer {
   name: "block1_bn1"
   type: "BatchNorm"
   bottom: "block1_conv"
   top: "block1_conv"
   batch_norm_param {
-
   }
 }
+
 layer {
   bottom: "block1_conv"
   top: "block1_conv"
@@ -114,6 +118,7 @@ layer {
       bias_term: true
    }
 }
+
 layer {
   name: "block1_relu"
   type: "ReLU"
@@ -122,6 +127,7 @@ layer {
   relu_param {
   }
 }
+
 layer {
   name: "block1_drop"
   type: "Dropout"
@@ -134,13 +140,14 @@ layer {
     phase: TRAIN    
   }
 }
+
 layer {
   name: "block1_conv2"
   type: "Convolution"
   bottom: "block1_conv"
   top: "block1_conv2"
   convolution_param {
-	num_output: 96
+    num_output: 96
     pad: 1
     kernel_size: 3
     stride: 1
@@ -154,6 +161,7 @@ layer {
     }
   }
 }
+
 layer {
   name: "block1_conv3"
   type: "Convolution"
@@ -175,6 +183,7 @@ layer {
     }
   }
 }
+
 layer {
         bottom: "block1_conv2"
         bottom: "block1_conv3"
@@ -185,6 +194,7 @@ layer {
         }
 }
 
+
 #############################
 layer {
   name: "block2_BatchNorm1"
@@ -194,6 +204,7 @@ layer {
   batch_norm_param {
   }
 }
+
 layer {
   bottom: "block2_in"
   top: "block2_in"
@@ -203,6 +214,7 @@ layer {
       bias_term: true
    }
 }
+
 layer {
   name: "block2_ReLU1"
   type: "ReLU"
@@ -211,6 +223,7 @@ layer {
   relu_param {
   }
 }
+
 layer {
   name: "block2_conv"
   type: "Convolution"
@@ -232,6 +245,7 @@ layer {
     }
   }
 }
+
 layer {
   name: "block2_BatchNorm2"
   type: "BatchNorm"
@@ -240,6 +254,7 @@ layer {
   batch_norm_param {
   }
 }
+
 layer {
   bottom: "block2_conv"
   top: "block2_conv"
@@ -249,6 +264,7 @@ layer {
       bias_term: true
    }
 }
+
 layer {
   name: "block2_relu2"
   type: "ReLU"
@@ -257,6 +273,7 @@ layer {
   relu_param {
   }
 }
+
 layer {
   name: "block2_drop"
   type: "Dropout"
@@ -265,18 +282,18 @@ layer {
   dropout_param {
     dropout_ratio: 0.3
   }
-
   include {
     phase: TRAIN    
   }
 }
+
 layer {
   name: "block2_conv2"
   type: "Convolution"
   bottom: "block2_conv"
   top: "block2_conv2"
   convolution_param {
-	num_output: 96
+    num_output: 96
     pad: 1
     kernel_size: 3
     stride: 1
@@ -290,15 +307,18 @@ layer {
     }
   }
 }
+
 layer {
-        bottom: "block2_conv2"
-        bottom: "block1"
-        top: "block2"
-        name: "block2"
-        type: "Eltwise"
-        eltwise_param {
-        }
+    bottom: "block2_conv2"
+    bottom: "block1"
+    top: "block2"
+    name: "block2"
+    type: "Eltwise"
+    eltwise_param {
+    }
 }
+
+
 #####################
 layer {
   name: "block3_BatchNorm1"
@@ -2275,7 +2295,7 @@ layer {
   bottom: "block22_conv"
   top: "block22_conv2"
   convolution_param {
-	num_output: 384
+    num_output: 384
     pad: 1
     kernel_size: 3
     stride: 1
@@ -2290,6 +2310,7 @@ layer {
     }
   }
 }
+
 layer {
         bottom: "block22_conv2"
         bottom: "block21"
@@ -2299,6 +2320,7 @@ layer {
         eltwise_param {
         }
 }
+
 layer {
   name: "BatchNormLast"
   type: "BatchNorm"
@@ -2307,6 +2329,7 @@ layer {
   batch_norm_param {
   }
 }
+
 layer {
   bottom: "block22"
   top: "block22"
@@ -2316,6 +2339,7 @@ layer {
       bias_term: true
    }
 }
+
 layer {
   name: "LastRelu"
   type: "ReLU"
@@ -2324,6 +2348,7 @@ layer {
   relu_param {
   }
 }
+
 layer {
   name: "avgPool"
   type: "Pooling"
@@ -2334,6 +2359,7 @@ layer {
     global_pooling:true
   }
 }
+
 layer {
   name: "fc"
   type: "InnerProduct"

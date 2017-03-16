@@ -37,9 +37,9 @@ def main():
     n_testtime_augmentation = len(testtime_augmentation(test_im, 0)[0])
     #### get the parallel data generator
     gen = ParallelBatchIterator(get_images_with_filenames,
-            filenames, ordered=True,
-            batch_size=batch_size//(3*n_testtime_augmentation),
-            multiprocess=False, n_producers=12)
+            filenames, ordered = True,
+            batch_size = batch_size // (3*n_testtime_augmentation),
+            multiprocess = False, n_producers=12)
     ### get wide resnet caffe model
     caffe_net = caffe.Net(net_file, model_path, caffe.TEST)
     ###do forward pass
@@ -47,15 +47,16 @@ def main():
     all_filenames = []
     print('begin predicting...')
     for i, batch in enumerate(gen):
-        data, label, fnames =  batch
+        data, label, fnames = batch
         ### pass data and label to caff net, please set the batchszie to 12(atomic batchsize) for both prediction batch size and train batch size
         if data.shape[0] == batch_size:
-            caffe_net.blobs['data'].data[...] = data.astype(np.float32, copy=False)
-            caffe_net.blobs['label'].data[...] = label.astype(np.float32, copy=False)
+            caffe_net.blobs['data'].data[...] = data.astype(np.float32, copy = False)
+            caffe_net.blobs['label'].data[...] = label.astype(np.float32, copy = False)
             caffe_net.forward()
             softmax_out = caffe_net.blobs['prob'].data.copy()
             all_probabilities += list(softmax_out[:, 1].tolist())
             all_filenames += list(fnames)
+            # print("one batch done")
         else:
             break
     ### for all filenames get the probalilities(3*n_testtime_augmentation)

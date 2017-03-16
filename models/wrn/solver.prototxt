@@ -2,7 +2,7 @@ engine: "MKL2017"
 net: "../../../models/wrn/wide_resnet.prototxt"
 test_iter: 4 
 test_interval: 120
-display: 40
+display: 20
 average_loss: 40
 base_lr: 0.01
 lr_policy: "multistep"
