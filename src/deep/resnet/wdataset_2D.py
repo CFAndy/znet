@@ -7,7 +7,7 @@ from normalize import normalize
 from params import wrn_params as P
 import augment
 
-def load_images (image_paths, deterministic=False):
+def load_images(image_paths, deterministic=False):
     X = []
 
     labels = []
