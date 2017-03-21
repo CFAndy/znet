@@ -15,5 +15,5 @@ weight_decay: 0.00001
 regularization_type: "L2"
 type: "Nesterov"
 snapshot: 500
-snapshot_prefix: "../../../wrn_weight/"
+snapshot_prefix: "../../../snapshots/wrn"
 solver_mode: CPU

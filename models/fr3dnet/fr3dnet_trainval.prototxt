@@ -1,0 +1,192 @@
+name: "fr3dnet"
+time_info: true
+engine: "CAFFE"
+
+layer {
+  name: "input-data"
+  type: "DummyData"
+  top: "data"
+  top: "label"
+  dummy_data_param {
+    shape: {dim: 1 dim: 1 dim: 512 dim: 512 dim: 64}
+    shape: {dim: 1 dim: 1}
+  }
+}
+
+layer {
+    bottom: "data"
+    top: "conv0"
+    name: "conv0"
+    type: "Convolution"
+    convolution_param {
+        num_output: 64
+        kernel_size: 5
+        kernel_size: 5
+        kernel_size: 5
+        pad: 2
+        pad: 2
+        pad: 0
+        stride: 2
+        stride: 2
+        stride: 2
+        weight_filler {
+          type: "msra"
+        }
+    }
+}
+
+layer {
+    bottom: "conv0"
+    top: "conv0"
+    name: "conv0_relu"
+    type: "ReLU"
+    relu_param {
+      negative_slope: 0.01 
+    }
+}
+
+layer {
+    bottom: "conv0"
+    top: "conv1_0"
+    name: "conv1_0"
+    type: "Convolution"
+    convolution_param {
+        num_output: 64
+        kernel_size: 5
+        kernel_size: 5
+        kernel_size: 5
+        pad: 2
+        pad: 2
+        pad: 0
+        stride: 1
+        stride: 1
+        stride: 1
+        weight_filler {
+          type: "msra"
+        }
+    }
+}
+
+layer {
+    bottom: "conv1_0"
+    top: "conv1_0"
+    name: "conv1_0_relu"
+    type: "ReLU"
+    relu_param {
+      negative_slope: 0.01 
+    }
+}
+
+layer {
+    bottom: "conv1_0"
+    top: "conv1_1"
+    name: "conv1_1"
+    type: "Convolution"
+    convolution_param {
+        num_output: 96
+        kernel_size: 5
+        kernel_size: 5
+        kernel_size: 5
+        pad: 2
+        pad: 2
+        pad: 0
+        stride: 1
+        stride: 1
+        stride: 1
+        weight_filler {
+          type: "msra"
+        }
+    }
+}
+
+layer {
+    bottom: "conv1_1"
+    top: "conv1_1"
+    name: "conv1_1_relu"
+    type: "ReLU"
+    relu_param {
+      negative_slope: 0.01 
+    }
+}
+
+layer {
+  name: "fc2"
+  type: "InnerProduct"
+  bottom: "conv1_1"
+  top: "fc2"
+  
+  inner_product_param {
+    num_output: 420
+    weight_filler {
+      type: "msra"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+
+layer {
+    bottom: "fc2"
+    top: "fc2"
+    name: "fc2_relu"
+    type: "ReLU"
+    relu_param {
+      negative_slope: 0.01 
+    }
+}
+
+layer {
+  name: "fc3"
+  type: "InnerProduct"
+  bottom: "fc2"
+  top: "fc3"
+  
+  inner_product_param {
+    num_output: 2
+    weight_filler {
+      type: "msra"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+
+layer {
+    bottom: "fc3"
+    bottom: "label"
+    top: "loss"
+    name: "loss"
+    type: "SoftmaxWithLoss"
+    loss_param {
+        ignore_label: -10
+    }
+}
+
+layer {
+    name: "prob"
+    type: "Softmax"
+    bottom: "fc3"
+    top: "prob"
+    include {
+        phase: TEST
+    }
+}
+
+layer {
+  name: "top1"
+  type: "Accuracy"
+  bottom: "fc3"
+  bottom: "label"
+  top: "top1"
+  accuracy_param {
+      ignore_label: -10
+  }
+  include {
+     phase: TEST
+  }
+}
+

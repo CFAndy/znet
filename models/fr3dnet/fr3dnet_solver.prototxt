@@ -1,4 +1,4 @@
-net: "../../../models/unet/unet_trainval.prototxt"
+net: "../../../models/fr3dnet/fr3dnet_trainval.prototxt"
 solver_mode: CPU
 type: "Nesterov"
 test_iter: 518
@@ -16,4 +16,4 @@ regularization_type: "L2"
 weight_decay: 1e-5
 max_iter: 311061
 snapshot: 40000
-snapshot_prefix: "../../../snapshots/unet"
+snapshot_prefix: "../../../snapshots/fr3dnet"
