@@ -1,5 +1,6 @@
 engine: "MKL2017"
 name: "wrn_384_v8"
+# time_info: true
 
 layer {
   name: "input-data"

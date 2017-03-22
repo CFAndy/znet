@@ -1,4 +1,6 @@
 name: "UNet"
+# time_info: true
+engine: "MKL2017"
 
 layer {
   name: "input-data"
