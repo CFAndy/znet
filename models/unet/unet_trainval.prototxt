@@ -978,6 +978,7 @@ layer {
 
 # score layer
 layer {
+    engine: "CAFFE"
     bottom: "_conv0_2"
     top: "score"
     name: "score"
