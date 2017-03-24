@@ -26,9 +26,6 @@ layer {
         pad: 0
         pad: 2
         pad: 2
-        stride: 2
-        stride: 2
-        stride: 2
         weight_filler {
           type: "msra"
         }
@@ -37,7 +34,19 @@ layer {
 
 layer {
     bottom: "conv0"
-    top: "conv0"
+    top: "pool0"
+    name: "pool0"
+    type: "Pooling"
+    pooling_param {
+        pool: MAX
+        kernel_size: 2
+        stride: 2
+    }
+}
+
+layer {
+    bottom: "pool0"
+    top: "pool0"
     name: "conv0_relu"
     type: "ReLU"
     relu_param {
@@ -46,7 +55,7 @@ layer {
 }
 
 layer {
-    bottom: "conv0"
+    bottom: "pool0"
     top: "conv1_0"
     name: "conv1_0"
     type: "Convolution"
