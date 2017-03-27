@@ -639,7 +639,7 @@ layer {
   bottom: "block5_conv"
   top: "block5_conv2"
   convolution_param {
-	num_output: 96
+    num_output: 96
     pad: 1
     kernel_size: 3
     stride: 1
