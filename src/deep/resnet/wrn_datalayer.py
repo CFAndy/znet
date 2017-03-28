@@ -19,12 +19,12 @@ class DataLayer(caffe.Layer):
         np.random.shuffle(self.epoch_data)
 
     def read_data(self):
-        l,t,= dataset_2D.load_images(self.epoch_data[self.index:self.index+batch_size])
-        self.index +=batch_size
+        l, t, = dataset_2D.load_images(self.epoch_data[self.index : (self.index + batch_size)])
+        self.index += batch_size
         if self.index + batch_size > len(self.epoch_data):
             self.index = 0
             self._shuffle_data()
-        return l,t
+        return l, t
 
     def setup(self, bottom, top):
         # print ("set up")
@@ -33,24 +33,22 @@ class DataLayer(caffe.Layer):
         self.file_false = filter(lambda x: "False" in x, file_names)
         self.n_true = len(self.file_true)
         self._shuffle_data()
-        self.index=0
+        self.index = 0
 
-        idx = 0
-        top[idx].reshape(P.BATCH_SIZE_TRAIN, P.CHANNELS, PIXELS, PIXELS)
-        idx += 1
-        top[idx].reshape(P.BATCH_SIZE_TRAIN, W)
+        top[0].reshape(P.BATCH_SIZE_TRAIN, P.CHANNELS, PIXELS, PIXELS)
+        top[1].reshape(P.BATCH_SIZE_TRAIN, W)
 
     def forward(self, bottom, top):
         data, label = self.read_data()
         if label.shape[0] != P.BATCH_SIZE_TRAIN:
-            top[0].reshape(data.shape[0],P.CHANNELS, PIXELS, PIXELS)
-            top[1].reshape(label.shape[0],W)
+            top[0].reshape(data.shape[0], P.CHANNELS, PIXELS, PIXELS)
+            top[1].reshape(label.shape[0], W)
             print ('reshape ', label.shape[0])
-            top[0].data[...] = data.astype(np.float32, copy=False)
-            top[1].data[...] = label.astype(np.float32, copy=False)
+            top[0].data[...] = data.astype(np.float32, copy = False)
+            top[1].data[...] = label.astype(np.float32, copy = False)
         else:
-            top[0].data[...] = data.astype(np.float32, copy=False)
-            top[1].data[...] = label.astype(np.float32, copy=False)
+            top[0].data[...] = data.astype(np.float32, copy = False)
+            top[1].data[...] = label.astype(np.float32, copy = False)
 
     def backward(self, top, propagate_down, bottom):
         """This layer does not propagate gradients."""
@@ -64,40 +62,42 @@ class DataLayer(caffe.Layer):
 class ValDataLayer(caffe.Layer):
     def _shuffle_data(self):
         np.random.shuffle(self.file_false)
-        self.epoch_data = self.file_true + self.file_false[:self.n_true]
+        self.epoch_data = self.file_true + self.file_false[ : self.n_true]
         np.random.shuffle(self.epoch_data)
 
     def read_data(self):
-        l,t,= dataset_2D.load_images(self.epoch_data[self.index:self.index+batch_size],True)
-        self.index +=batch_size
+        l, t, = dataset_2D.load_images(self.epoch_data[self.index:(self.index + batch_size)], True)
+        self.index += batch_size
         if self.index + batch_size > len(self.epoch_data):
             self.index = 0
             self._shuffle_data()
-        return l,t
+        return l, t
 
     def setup(self, bottom, top):
         file_names = glob.glob(P.FILENAMES_VALIDATION)
         self.file_true = filter(lambda x: "True" in x, file_names)
         self.file_false = filter(lambda x: "False" in x, file_names)
+        # print "true cases: ", len(self.file_true)
+        # print "false cases: ", len(self.file_false)
         self.n_true = len(self.file_true)
         self._shuffle_data()
         self.index = 0
-        idx = 0
-        top[idx].reshape(P.BATCH_SIZE_TRAIN, P.CHANNELS, PIXELS, PIXELS)
-        idx += 1
-        top[idx].reshape(P.BATCH_SIZE_TRAIN, W)
+        top[0].reshape(P.BATCH_SIZE_TRAIN, P.CHANNELS, PIXELS, PIXELS)
+        top[1].reshape(P.BATCH_SIZE_TRAIN, W)
 
     def forward(self, bottom, top):
         data, label = self.read_data()
         if label.shape[0] != P.BATCH_SIZE_TRAIN:
-            top[0].reshape(data.shape[0],P.CHANNELS, PIXELS, PIXELS)
-            top[1].reshape(label.shape[0],W)
+            top[0].reshape(data.shape[0], P.CHANNELS, PIXELS, PIXELS)
+            top[1].reshape(label.shape[0], W)
             print ('reshape ', label.shape[0])
-            top[0].data[...] = data.astype(np.float32, copy=False)
-            top[1].data[...] = label.astype(np.float32, copy=False)
+            top[0].data[...] = data.astype(np.float32, copy = False)
+            top[1].data[...] = label.astype(np.float32, copy = False)
         else:
-            top[0].data[...] = data.astype(np.float32, copy=False)
-            top[1].data[...] = label.astype(np.float32, copy=False)
+            top[0].data[...] = data.astype(np.float32, copy = False)
+            top[1].data[...] = label.astype(np.float32, copy = False)
+        # print "batch size: ", label.shape[0]
+
     def backward(self, top, propagate_down, bottom):
         """This layer does not propagate gradients."""
         pass

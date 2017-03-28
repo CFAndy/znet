@@ -1,11 +1,11 @@
 net: "../../../models/unet/unet_trainval.prototxt"
 solver_mode: CPU
 type: "Nesterov"
-test_iter: 518
+test_iter: 1036
 test_interval: 1550
 test_initialization: false
 test_compute_loss: true
-display: 1550
+display: 20 # 1550
 average_loss: 40
 base_lr: 0.0001
 lr_policy: "fixed" # "step"

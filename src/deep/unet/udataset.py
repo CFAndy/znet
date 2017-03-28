@@ -42,7 +42,7 @@ def get_image(filename, deterministic):
     # print np.sum(truth)
     # print truth.shape
     # print truth_filename
-    with gzip.open(truth_filename,'rb') as f:
+    with gzip.open(truth_filename, 'rb') as f:
         bb = pickle.load(f)[0]
         # print len(bb)
         for i in xrange(len(bb)):
@@ -53,7 +53,7 @@ def get_image(filename, deterministic):
             x2 = int(x2 + 1)
             y2 = int(y2 + 1)
             # print x1, y1, x2, y2
-            truth[x1:x2,y1:y2] = 1
+            truth[x1:x2, y1:y2] = 1
 
     if os.path.isfile(segmentation_filename):
         with gzip.open(segmentation_filename,'rb') as f:
@@ -68,7 +68,7 @@ def get_image(filename, deterministic):
         kernel = skimage.morphology.disk(P.ERODE_SEGMENTATION)
         outside = skimage.morphology.binary_erosion(outside, kernel)
 
-    outside = np.array(outside, dtype=np.float32)
+    outside = np.array(outside, dtype = np.float32)
 
     if P.AUGMENT and not deterministic:
         lung, truth, outside = augment([lung, truth, outside])
@@ -76,17 +76,17 @@ def get_image(filename, deterministic):
     if P.RANDOM_CROP > 0:
         im_x = lung.shape[0]
         im_y = lung.shape[1]
-        x = np.random.randint(0, max(1,im_x-P.RANDOM_CROP))
-        y = np.random.randint(0, max(1,im_y-P.RANDOM_CROP))
+        x = np.random.randint(0, max(1, im_x - P.RANDOM_CROP))
+        y = np.random.randint(0, max(1, im_y - P.RANDOM_CROP))
 
-        lung = lung[x:x+P.RANDOM_CROP, y:y+P.RANDOM_CROP]
-        truth = truth[x:x+P.RANDOM_CROP, y:y+P.RANDOM_CROP]
-        outside = outside[x:x+P.RANDOM_CROP, y:y+P.RANDOM_CROP]
+        lung = lung[x:x+P.RANDOM_CROP, y : y + P.RANDOM_CROP]
+        truth = truth[x:x+P.RANDOM_CROP, y : y + P.RANDOM_CROP]
+        outside = outside[x:x+P.RANDOM_CROP, y : y + P.RANDOM_CROP]
 
-    truth = np.array(np.round(truth),dtype=np.int64)
-    outside = np.array(np.round(outside),dtype=np.int64)
+    truth = np.array(np.round(truth), dtype = np.int64)
+    outside = np.array(np.round(outside), dtype = np.int64)
 
-    #Set label of outside pixels to -10
+    # Set label of outside pixels to -10
     truth = truth - (outside * 10)
 
     lung = lung * (1 - outside)
@@ -98,7 +98,7 @@ def get_image(filename, deterministic):
         outside = crop_or_pad(outside, OUTPUT_SIZE, 1)
     else:
         out_size = output_size_for_input(lung.shape[1], P.DEPTH)
-        #lung = crop_or_pad(lung, INPUT_SIZE, -1000)
+        # lung = crop_or_pad(lung, INPUT_SIZE, -1000)
         truth = crop_or_pad(truth, out_size, 0)
         outside = crop_or_pad(outside, out_size, 1)
 
@@ -109,16 +109,17 @@ def get_image(filename, deterministic):
         lung = lung - P.MEAN_PIXEL
 
     truth = np.array(np.expand_dims(np.expand_dims(truth, axis = 0), axis = 0), dtype = np.int64)
+
     return lung, truth
 
 def crop_or_pad(image, desired_size, pad_value):
     if image.shape[0] < desired_size:
         offset = int(np.ceil((desired_size - image.shape[0]) / 2))
-        image = np.pad(image, offset, 'constant', constant_values=pad_value)
+        image = np.pad(image, offset, 'constant', constant_values = pad_value)
 
     if image.shape[0] > desired_size:
-        offset = (image.shape[0]-desired_size)//2
-        image = image[offset:offset+desired_size,offset:offset+desired_size]
+        offset = (image.shape[0] - desired_size) // 2
+        image = image[offset : offset + desired_size, offset : offset + desired_size]
 
     return image
 
@@ -126,12 +127,12 @@ def load_images(filenames, deterministic=False):
     slices = [get_image(filename, deterministic) for filename in filenames]
     lungs, truths = zip(*slices)
 
-    l = np.array(np.concatenate(lungs,axis=0), dtype=np.float32)
-    t = np.concatenate(truths,axis=0)
+    l = np.array(np.concatenate(lungs, axis = 0), dtype = np.float32)
+    t = np.concatenate(truths, axis = 0)
 
     # Weight the loss by class balancing, classes other than 0 and 1
     # get set to 0 (the background is -10)
-    w = loss_weighting.weight_by_class_balance(t, classes=[0,1])
+    w = loss_weighting.weight_by_class_balance(t, classes = [0, 1])
 
     #Set -1 labels back to label 0
     t = np.clip(t, 0, 100000)
@@ -142,33 +143,32 @@ def get_scan_name(filename):
     scan_name = filename.replace('\\','/').split('/')[-1].split('_')[0]
     return scan_name
 
-def train_splits_by_z(filenames, data_resolution=0.5, n_splits=None):
+def train_splits_by_z(filenames, data_resolution = 0.5, n_splits = None):
     import pandas as pd
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
     zspacing_file = os.path.join(cur_dir, "./../../../data/luna2016/imagename_zspacing.csv")
-    resolution_of_scan = pd.read_csv(zspacing_file, header=None, names=['filename','spacing'], index_col=False)
-
+    resolution_of_scan = pd.read_csv(zspacing_file, header = None, names = ['filename', 'spacing'], index_col = False)
 
     scan_names = set(map(get_scan_name, filenames))
-    resolutions = [resolution_of_scan[resolution_of_scan['filename']==scan].iloc[0]['spacing'] for scan in scan_names]
+    resolutions = [resolution_of_scan[resolution_of_scan['filename'] == scan].iloc[0]['spacing'] for scan in scan_names]
     scan_filenames = []
     for scan in scan_names:
         scan_filenames.append(filter(lambda x: scan in x, filenames))
     # print len(scan_filenames)
 
-    split_per_scan = [int(np.round(r/data_resolution)) for r in resolutions] #Amount of splits to divide the filenames over
+    split_per_scan = [int(np.round(r / data_resolution)) for r in resolutions] # Amount of splits to divide the filenames over
     random_offsets = [np.random.permutation(range(x)) for x in split_per_scan]
 
     if n_splits is None:
-        n_splits = np.round(max(resolutions)/data_resolution)
+        n_splits = np.round(max(resolutions) / data_resolution)
 
     splits = [ [] for _ in xrange(n_splits)]
 
     for i, s in enumerate(splits):
         for r, scan, filenames_in_scan, n, offset in zip(resolutions, scan_names, scan_filenames, split_per_scan, random_offsets):
             # n = int(np.round(r/data_resolution))
-            start = offset[i%n]
-            s += filenames_in_scan[start%n::n]
+            start = offset[i % n]
+            s += filenames_in_scan[start % n::n]
 
     return splits

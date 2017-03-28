@@ -21,9 +21,9 @@ def get_images_with_filenames(filenames):
         new_targets+=trs
     new_filenames = []
     for fname in filenames:
-        for i in range(int(len(new_inputs)/len(filenames))):
+        for i in range(int(len(new_inputs) / len(filenames))):
             new_filenames.append(fname)
-    return np.array(new_inputs,dtype=np.float32),np.array(new_targets,dtype=np.int32), new_filenames
+    return np.array(new_inputs, dtype = np.float32), np.array(new_targets, dtype = np.int32), new_filenames
 
 
 def main():
@@ -38,8 +38,8 @@ def main():
     #### get the parallel data generator
     gen = ParallelBatchIterator(get_images_with_filenames,
             filenames, ordered = True,
-            batch_size = batch_size // (3*n_testtime_augmentation),
-            multiprocess = False, n_producers=12)
+            batch_size = batch_size // (3 * n_testtime_augmentation),
+            multiprocess = False, n_producers = 12)
     ### get wide resnet caffe model
     caffe_net = caffe.Net(net_file, model_path, caffe.TEST)
     ###do forward pass
@@ -72,14 +72,14 @@ def main():
     cur_dir = os.path.dirname(os.path.abspath(__file__))
     candidates = pd.read_csv(os.path.join(cur_dir, './../../../data/candidates_V2.csv'))
     data = []
-    ###get the mean prob for each filename and get the row number of the candidate
+    ### get the mean prob for each filename and get the row number of the candidate
     for x in d.iteritems():
         fname, probabilities = x
         prob = np.mean(probabilities)
         candidates_row = int(os.path.split(fname)[1].replace('.pkl.gz','')) - 2
-        data.append(list(candidates.iloc[candidates_row].values)[:-1]+[str(prob)])
-    ###write the prob to a .csv
-    submission = pd.DataFrame(columns = ['seriesuid', 'coordX', 'coordY', 'coordZ', 'probability'], data=data)
+        data.append(list(candidates.iloc[candidates_row].values)[:-1] + [str(prob)])
+    ### write the prob to a .csv
+    submission = pd.DataFrame(columns = ['seriesuid', 'coordX', 'coordY', 'coordZ', 'probability'], data = data)
     submission_path = os.path.join(cur_dir, './../../../data/submission_subset45.csv')
     submission.to_csv(submission_path, columns=['seriesuid', 'coordX', 'coordY', 'coordZ', 'probability'])
     print('finished!')

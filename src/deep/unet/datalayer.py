@@ -69,7 +69,8 @@ class DataLayer(caffe.Layer):
 
 class ValDataLayer(caffe.Layer):
     def read_data(self):
-        l, t, w, _ = udataset.load_images(self.data[self.index:self.index + self.batch_size])
+        # print "val data: ", self.data[self.index]
+        l, t, w, _ = udataset.load_images(self.data[self.index : self.index + self.batch_size])
         self.index += self.batch_size
         if self.index + self.batch_size > len(self.data):
             self.index = 0
@@ -87,10 +88,8 @@ class ValDataLayer(caffe.Layer):
         self.index = 0
         # sys.exit(0)
 
-        idx = 0
-        top[idx].reshape(self.batch_size, P.CHANNELS, INPUT_SIZE, INPUT_SIZE)
-        idx += 1
-        top[idx].reshape(self.batch_size, 1, OUTPUT_SIZE, OUTPUT_SIZE)
+        top[0].reshape(self.batch_size, P.CHANNELS, INPUT_SIZE, INPUT_SIZE)
+        top[1].reshape(self.batch_size, 1, OUTPUT_SIZE, OUTPUT_SIZE)
 
     def forward(self, bottom, top):
         data, label = self.read_data()
