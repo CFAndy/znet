@@ -2403,9 +2403,6 @@ layer {
   bottom: "fc"
   bottom: "label"
   top: "loss"
-  include {
-    phase: TRAIN    
-  }
 }
 
 layer {

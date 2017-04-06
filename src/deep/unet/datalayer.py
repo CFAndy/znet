@@ -16,12 +16,12 @@ OUTPUT_SIZE = output_size_for_input(INPUT_SIZE, NET_DEPTH)
 
 class DataLayer(caffe.Layer):
     def read_data(self):
-        l, t, w, _ = udataset.load_images(self.train_data[self.index : self.index + self.batch_size])
+        d, l, w, _ = udataset.load_images(self.train_data[self.index : self.index + self.batch_size])
         self.index += self.batch_size
         if self.index + self.batch_size > len(self.train_data):
             self.index = 0
             np.random.shuffle(self.train_data)
-        return l, t
+        return d, l, w
 
     def setup(self, bottom, top):
         # print ("setup")
@@ -36,25 +36,26 @@ class DataLayer(caffe.Layer):
 
         self.index = 0
         self.batch_size = P.BATCH_SIZE_TRAIN
-        # sys.exit(0)
 
-        idx = 0
-        top[idx].reshape(self.batch_size, P.CHANNELS, INPUT_SIZE, INPUT_SIZE)
-        idx += 1
-        top[idx].reshape(self.batch_size, 1, OUTPUT_SIZE, OUTPUT_SIZE)
+        top[0].reshape(self.batch_size, P.CHANNELS, INPUT_SIZE, INPUT_SIZE)
+        top[1].reshape(self.batch_size, 1, OUTPUT_SIZE, OUTPUT_SIZE)
+        top[2].reshape(self.batch_size, 1, OUTPUT_SIZE, OUTPUT_SIZE)
 
     def forward(self, bottom, top):
         # print "datalayer start forward"
-        data, label = self.read_data()
+        data, label, weights = self.read_data()
         if label.shape[0] != self.batch_size:
             top[0].reshape(data.shape[0], P.CHANNELS, INPUT_SIZE, INPUT_SIZE)
             top[1].reshape(label.shape[0], 1, OUTPUT_SIZE, OUTPUT_SIZE)
+            top[2].reshape(label.shape[0], 1, OUTPUT_SIZE, OUTPUT_SIZE)
             print ('reshape ', label.shape[0])
             top[0].data[...] = data.astype(np.float32, copy = False)
             top[1].data[...] = label.astype(np.float32, copy = False)
+            top[2].data[...] = weights.astype(np.float32, copy = False)
         else:
             top[0].data[...] = data.astype(np.float32, copy = False)
             top[1].data[...] = label.astype(np.float32, copy = False)
+            top[2].data[...] = weights.astype(np.float32, copy = False)
         # print ("read data\n")
         # sys.exit(0)
 
@@ -70,12 +71,12 @@ class DataLayer(caffe.Layer):
 class ValDataLayer(caffe.Layer):
     def read_data(self):
         # print "val data: ", self.data[self.index]
-        l, t, w, _ = udataset.load_images(self.data[self.index : self.index + self.batch_size])
+        d, l, w, _ = udataset.load_images(self.data[self.index : self.index + self.batch_size])
         self.index += self.batch_size
         if self.index + self.batch_size > len(self.data):
             self.index = 0
             np.random.shuffle(self.data)
-        return l, t
+        return d, l, w
 
     def setup(self, bottom, top):
         # print ("setup")
@@ -86,24 +87,26 @@ class ValDataLayer(caffe.Layer):
 
         print "validation data size: ", len(self.data)
         self.index = 0
-        # sys.exit(0)
 
         top[0].reshape(self.batch_size, P.CHANNELS, INPUT_SIZE, INPUT_SIZE)
         top[1].reshape(self.batch_size, 1, OUTPUT_SIZE, OUTPUT_SIZE)
+        top[2].reshape(self.batch_size, 1, OUTPUT_SIZE, OUTPUT_SIZE)
 
     def forward(self, bottom, top):
-        data, label = self.read_data()
+        data, label, weights = self.read_data()
         if label.shape[0] != self.batch_size:
             top[0].reshape(data.shape[0], P.CHANNELS, INPUT_SIZE, INPUT_SIZE)
             top[1].reshape(label.shape[0], 1, OUTPUT_SIZE, OUTPUT_SIZE)
+            top[2].reshape(label.shape[0], 1, OUTPUT_SIZE, OUTPUT_SIZE)
             print ('reshape ', label.shape[0])
             top[0].data[...] = data.astype(np.float32, copy = False)
             top[1].data[...] = label.astype(np.float32, copy = False)
+            top[2].data[...] = weights.astype(np.float32, copy = False)
         else:
             top[0].data[...] = data.astype(np.float32, copy = False)
             top[1].data[...] = label.astype(np.float32, copy = False)
+            top[2].data[...] = weights.astype(np.float32, copy = False)
         # print ("read data\n")
-        # sys.exit(0)
 
     def backward(self, top, propagate_down, bottom):
         """This layer does not propagate gradients."""

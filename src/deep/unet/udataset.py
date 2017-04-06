@@ -27,15 +27,8 @@ def get_image(filename, deterministic):
         lung = pickle.load(f)
 
     np.set_printoptions(threshold = 'nan')
-    # truth_filename = filename.replace('lung','nodule')
-    segmentation_filename = filename.replace('lung','lung_masks')
-    # segmentation_filename = re.sub(r'subset[0-9]','',segmentation_filename)
+    segmentation_filename = filename.replace('lung', 'lung_masks')
 
-    # if os.path.isfile(truth_filename):
-    #     with gzip.open(truth_filename,'rb') as f:
-    #        truth = np.array(pickle.load(f),dtype=np.float32)
-    # else:
-    #    truth = np.zeros_like(lung)
     # get nodule through bounding box
     truth_filename = filename.replace('lung','bbox')
     truth = np.zeros_like(lung)
@@ -44,7 +37,6 @@ def get_image(filename, deterministic):
     # print truth_filename
     with gzip.open(truth_filename, 'rb') as f:
         bb = pickle.load(f)[0]
-        # print len(bb)
         for i in xrange(len(bb)):
             y1, x1 = bb[i][0:2]
             y2, x2 = bb[i][2:4]
@@ -79,9 +71,9 @@ def get_image(filename, deterministic):
         x = np.random.randint(0, max(1, im_x - P.RANDOM_CROP))
         y = np.random.randint(0, max(1, im_y - P.RANDOM_CROP))
 
-        lung = lung[x:x+P.RANDOM_CROP, y : y + P.RANDOM_CROP]
-        truth = truth[x:x+P.RANDOM_CROP, y : y + P.RANDOM_CROP]
-        outside = outside[x:x+P.RANDOM_CROP, y : y + P.RANDOM_CROP]
+        lung = lung[x : x + P.RANDOM_CROP, y : y + P.RANDOM_CROP]
+        truth = truth[x : x + P.RANDOM_CROP, y : y + P.RANDOM_CROP]
+        outside = outside[x : x + P.RANDOM_CROP, y : y + P.RANDOM_CROP]
 
     truth = np.array(np.round(truth), dtype = np.int64)
     outside = np.array(np.round(outside), dtype = np.int64)
@@ -123,7 +115,7 @@ def crop_or_pad(image, desired_size, pad_value):
 
     return image
 
-def load_images(filenames, deterministic=False):
+def load_images(filenames, deterministic = False):
     slices = [get_image(filename, deterministic) for filename in filenames]
     lungs, truths = zip(*slices)
 
@@ -134,7 +126,7 @@ def load_images(filenames, deterministic=False):
     # get set to 0 (the background is -10)
     w = loss_weighting.weight_by_class_balance(t, classes = [0, 1])
 
-    #Set -1 labels back to label 0
+    # Set -1 labels back to label 0
     t = np.clip(t, 0, 100000)
 
     return l, t, w, filenames
@@ -163,7 +155,7 @@ def train_splits_by_z(filenames, data_resolution = 0.5, n_splits = None):
     if n_splits is None:
         n_splits = np.round(max(resolutions) / data_resolution)
 
-    splits = [ [] for _ in xrange(n_splits)]
+    splits = [[] for _ in xrange(n_splits)]
 
     for i, s in enumerate(splits):
         for r, scan, filenames_in_scan, n, offset in zip(resolutions, scan_names, scan_filenames, split_per_scan, random_offsets):

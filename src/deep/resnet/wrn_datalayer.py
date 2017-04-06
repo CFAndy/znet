@@ -28,6 +28,8 @@ class DataLayer(caffe.Layer):
 
     def setup(self, bottom, top):
         # print ("set up")
+        # for debug
+        np.random.seed(0)
         file_names = glob.glob(P.FILENAMES_TRAIN)
         self.file_true = filter(lambda x: "True" in x, file_names)
         self.file_false = filter(lambda x: "False" in x, file_names)
@@ -74,6 +76,8 @@ class ValDataLayer(caffe.Layer):
         return l, t
 
     def setup(self, bottom, top):
+        # for debug
+        np.random.seed(0)
         file_names = glob.glob(P.FILENAMES_VALIDATION)
         self.file_true = filter(lambda x: "True" in x, file_names)
         self.file_false = filter(lambda x: "False" in x, file_names)
