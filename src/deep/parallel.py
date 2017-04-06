@@ -21,7 +21,7 @@ class ParallelBatchIterator(object):
 		max_queue_size: integer (default=2*n_producers)
 	"""
 
-	def __init__(self, batch_generator, X, batch_size=1, ordered=False, multiprocess=True, n_producers=4, max_queue_size=None):
+	def __init__(self, batch_generator, X, batch_size = 1, ordered = False, multiprocess = True, n_producers = 4, max_queue_size = None):
 		self.generator = batch_generator
 		self.ordered = ordered
 		self.multiprocess = multiprocess
@@ -30,7 +30,7 @@ class ParallelBatchIterator(object):
 		self.batch_size = batch_size
 
 		if max_queue_size is None:
-			self.max_queue_size = n_producers*2
+			self.max_queue_size = n_producers * 2
 		else:
 			self.max_queue_size = max_queue_size
 
@@ -38,14 +38,14 @@ class ParallelBatchIterator(object):
 		return self
 
 	def __iter__(self):
-		queue = JoinableQueue(maxsize=self.max_queue_size)
+		queue = JoinableQueue(maxsize = self.max_queue_size)
 
 		n_batches, job_queue = self._start_producers(queue)
 
 		# Run as consumer (read items from queue, in current thread)
 		for x in xrange(n_batches):
 			item = queue.get()
-			#print queue.qsize(), "GET"
+			# print queue.qsize(), "GET"
 			yield item # Yield the item to the consumer (user)
 			queue.task_done()
 
@@ -53,7 +53,7 @@ class ParallelBatchIterator(object):
 		job_queue.close()
 
 	def __len__(self):
-		return len(self.X)/self.batch_size
+		return len(self.X) / self.batch_size
 
 	def _start_producers(self, result_queue):
 		jobs = Queue()
@@ -63,37 +63,36 @@ class ParallelBatchIterator(object):
 		# Flag used for keeping values in queue in order
 		last_queued_job = Value('i', -1)
 
-		chunks = util.chunks(self.X,self.batch_size)
-
+		chunks = util.chunks(self.X, self.batch_size)
 
 		# Add jobs to queue
 		for job_index, X_batch in enumerate(chunks):
 			batch_count += 1
-			jobs.put( (job_index,X_batch) )
+			jobs.put((job_index, X_batch))
 
 		# Add poison pills to queue (to signal workers to stop)
 		for i in xrange(n_workers):
-			jobs.put((-1,None))
+			jobs.put((-1, None))
 
 		# Define producer function
 		produce = partial(_produce_helper,
-			generator=self.generator,
-			jobs=jobs,
-			result_queue=result_queue,
-			last_queued_job=last_queued_job,
-			ordered=self.ordered)
+			generator = self.generator,
+			jobs = jobs,
+			result_queue = result_queue,
+			last_queued_job = last_queued_job,
+			ordered = self.ordered)
 
 		# Start worker processes or threads
 		for i in xrange(n_workers):
 			name = "ParallelBatchIterator worker {0}".format(i)
 
 			if self.multiprocess:
-				p = Process(target=produce, args=(i,), name=name)
+				p = Process(target = produce, args = (i, ), name=name)
 			else:
-				p = Thread(target=produce, args=(i,), name=name)
+				p = Thread(target = produce, args = (i, ), name=name)
 
 			# Make the process daemon, so the main process can die without these finishing
-			#p.daemon = True
+			# p.daemon = True
 			p.start()
 
 		return batch_count, jobs

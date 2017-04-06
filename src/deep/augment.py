@@ -5,14 +5,14 @@ import numpy as np
 try:
     import cv2
     CV2_AVAILABLE = True
-    print "OpenCV 2 available, using that for augmentation"
+    print "OpenCV is available, using that for augmentation"
     from scipy.ndimage.interpolation import rotate, shift, zoom, affine_transform
     from skimage.transform import warp, AffineTransform
 except:
     from scipy.ndimage.interpolation import rotate, shift, zoom, affine_transform
     from skimage.transform import warp, AffineTransform
     CV2_AVAILABLE = False
-    print "OpenCV 2 NOT AVAILABLE, using skimage/scipy.ndimage instead"
+    print "OpenCV is NOT AVAILABLE, using skimage/scipy.ndimage instead"
 
 def augment(images):
     pixels = images[0].shape[1]
@@ -56,11 +56,11 @@ def augment(images):
                 image[:,:] = image[::-1,:]
                 image = image.transpose(1,0)
 
-            rotate(image, rotation_degrees, reshape=False, output=image)
+            rotate(image, rotation_degrees, reshape = False, output=image)
             # image2 = zoom(image, [zoom_factor,zoom_factor])
             image2 = crop_or_pad(image, pixels, -3000)
             shift(image2, [shift_x,shift_y], output=image)
-            # affine_transform(image, np.array([[zoom_x,0], [0,zoom_x]]), output=image)
+            # affine_transform(image, np.array([[zoom_x,0], [0,zoom_x]]), output = image)
             # z = AffineTransform(scale=(2,2))
             # image = warp(image, z.params)
             images[i] = image
@@ -88,15 +88,15 @@ def flip_axis(x, axis):
     x = x.swapaxes(0, axis)
     return x
 
-OPTS = [[False,False,False], [False, False, True], [False, True, False], [False, True, True],
+OPTS = [[False, False, False], [False, False, True], [False, True, False], [False, True, True],
         [True, False, False], [True, False, True], [True, True, False], [True, True, True]]
 
 def testtime_augmentation(image, label):
     labels = []
     images = []
     rotations = [0]
-    flips = [[0,0],[1,0],[0,1],[1,1]]
-    shifts = [[0,0]]
+    flips = [[0, 0], [1, 0], [0, 1], [1, 1]]
+    shifts = [[0, 0]]
     zooms = [1]
 
     for r in rotations:
@@ -107,15 +107,15 @@ def testtime_augmentation(image, label):
                     if f[0]:
                         image2[:,:] = image2[::-1,:]
                     if f[1]:
-                        image2 = image2.transpose(1,0)
+                        image2 = image2.transpose(1, 0)
                         image2[:,:] = image2[::-1,:]
-                        image2 = image2.transpose(1,0)
+                        image2 = image2.transpose(1, 0)
                     # rotate(image2, r, reshape=False, output=image2)
                     # image3 = zoom(image2, [z,z])
                     # image3 = crop_or_pad(image3, P.INPUT_SIZE, 0)
                     # image2 = image3
                     # shift(image2, [s[0],s[1]], output=image2)
-                    images.append([image2]) #Adds color channel dimension!
+                    images.append([image2]) # Adds color channel dimension!
                     labels.append(label)
 
     return images, labels
@@ -127,7 +127,7 @@ def flip_given_axes(image, opt):
 
     for i in range(3):
         if opt[i]:
-            flip_axis(image, i+offset)
+            flip_axis(image, i + offset)
     return image
 
 def get_all_flips_3d(image):
@@ -140,7 +140,7 @@ def get_all_flips_3d(image):
         im = np.copy(image)
         for i in range(3):
             if opt[i]:
-                flip_axis(im, i+offset)
+                flip_axis(im, i + offset)
         flippos.append(im)
 
     return flippos

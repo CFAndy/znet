@@ -1,4 +1,3 @@
-
 import Image
 import augment
 from skimage import util
@@ -10,8 +9,8 @@ import numpy as np
 
 if __name__ == "__main__":
     image = imread("example.jpg")
-    #print image
-    image = image[:,:,1]
+    # print image
+    image = image[:, :, 1]
     # plt.subplot(211)
     # image=np.array(image)
     # print image.shape

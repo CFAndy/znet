@@ -13,10 +13,10 @@ class Params():
         print "Loaded configurations from (in order)", read_from
 
         self.CONFIG = cf
-        cf.set('info','config_file', config_file_path)
+        cf.set('info', 'config_file', config_file_path)
 
-        if not cf.has_option('info','model_id'):
-            cf.set('info','model_id', str(int(time.time()))+"_"+cf.get('info','name'))
+        if not cf.has_option('info', 'model_id'):
+            cf.set('info', 'model_id', str(int(time.time())) + "_" + cf.get('info', 'name'))
 
         # Info
         self.EXPERIMENT = cf.get('info', 'experiment')
@@ -24,17 +24,17 @@ class Params():
         self.MODEL_ID = cf.get('info', 'model_id')
 
         # Dataset
-        self.PIXELS = cf.getint('dataset','pixels')
-        self.CHANNELS = cf.getint('dataset','channels')
-        self.N_CLASSES = cf.getint('dataset','n_classes')
+        self.PIXELS = cf.getint('dataset', 'pixels')
+        self.CHANNELS = cf.getint('dataset', 'channels')
+        self.N_CLASSES = cf.getint('dataset', 'n_classes')
 
-        self.SUBSET = None if cf.get('dataset','subset')=='None' else cf.getint('dataset','subset')
+        self.SUBSET = None if cf.get('dataset', 'subset') == 'None' else cf.getint('dataset', 'subset')
 
         cur_dir_ = os.path.dirname(os.path.abspath(__file__))
-        self.FILENAMES_TRAIN = os.path.join(cur_dir_, cf.get('dataset','filenames_train'))
-        self.FILENAMES_VALIDATION = os.path.join(cur_dir_, cf.get('dataset','filenames_validation'))
+        self.FILENAMES_TRAIN = os.path.join(cur_dir_, cf.get('dataset', 'filenames_train'))
+        self.FILENAMES_VALIDATION = os.path.join(cur_dir_, cf.get('dataset', 'filenames_validation'))
         self.FILENAMES_PREDICTION = os.path.join(cur_dir_, cf.get('dataset', 'filenames_prediction'))
-        self.DATA_FOLDER = cf.get('dataset','data_folder')
+        self.DATA_FOLDER = cf.get('dataset', 'data_folder')
 
         # Network
         self.ARCHITECTURE = cf.get('network', 'architecture')
@@ -75,9 +75,9 @@ class Params():
         self.AUGMENT = cf.getboolean('augmentation', 'augment')
         self.AUGMENTATION_PARAMS = {
             'flip': cf.getboolean('augmentation', 'flip'),
-            'zoom_range': (1.-cf.getfloat('augmentation', 'zoom'),1.+cf.getfloat('augmentation', 'zoom')),
-            'rotation_range': (-cf.getfloat('augmentation', 'rotation'),cf.getfloat('augmentation', 'rotation')),
-            'translation_range': (-cf.getfloat('augmentation', 'translation'),cf.getfloat('augmentation', 'translation'))
+            'zoom_range': (1.-cf.getfloat('augmentation', 'zoom'), 1. + cf.getfloat('augmentation', 'zoom')),
+            'rotation_range': (-cf.getfloat('augmentation', 'rotation'), cf.getfloat('augmentation', 'rotation')),
+            'translation_range': (-cf.getfloat('augmentation', 'translation'), cf.getfloat('augmentation', 'translation'))
         }
 
         # Misc
@@ -98,4 +98,5 @@ class Params():
 
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 unet_params = Params([os.path.join(cur_dir, "../../config/default.ini")] + [os.path.join(cur_dir, '../../config/unet_splits/split01.ini')])
+unet_prediction_params = Params([os.path.join(cur_dir, "../../config/default.ini")] + [os.path.join(cur_dir, '../../config/split01.ini')])
 wrn_params = Params([os.path.join(cur_dir, "../../config/default.ini")] + [os.path.join(cur_dir, "../../config/resnet56_3_diag.ini")])

@@ -1,12 +1,12 @@
 from __future__ import division
 import numpy as np
 
-def _calc_errors(truth, prediction, class_number=1):
-    tp = np.sum(np.equal(truth,class_number)*np.equal(prediction,class_number))
-    tn = np.sum(np.not_equal(truth,class_number)*np.not_equal(prediction,class_number))
+def _calc_errors(truth, prediction, class_number = 1):
+    tp = np.sum(np.equal(truth, class_number) * np.equal(prediction, class_number))
+    tn = np.sum(np.not_equal(truth, class_number) * np.not_equal(prediction, class_number))
 
-    fp = np.sum(np.not_equal(truth,class_number)*np.equal(prediction,class_number))
-    fn = np.sum(np.equal(truth,class_number)*np.not_equal(prediction,class_number))
+    fp = np.sum(np.not_equal(truth, class_number) * np.equal(prediction, class_number))
+    fn = np.sum(np.equal(truth, class_number) * np.not_equal(prediction, class_number))
 
     return tp, tn, fp, fn
 
@@ -37,7 +37,7 @@ class Metrics(object):
 
     def batch_done(self, skip_classes=[0]):
         n_batches = len(self.batch_values)
-        values = list(np.sum(np.array(self.batch_values),axis=0)/n_batches)
+        values = list(np.sum(np.array(self.batch_values), axis = 0) / n_batches)
         labels = self.metric_names
 
         classes = range(self.n_classes)
@@ -50,9 +50,9 @@ class Metrics(object):
                 errors = np.array(self.batch_errors[c])
                 tp, tn, fp, fn = np.sum(errors, axis=0)
 
-                specificity = tn/(fp+tn)
-                precision = tp/(tp+fp)
-                recall = tp/(tp+fn)
+                specificity = tn / (fp + tn)
+                precision = tp / (tp + fp)
+                recall = tp / (tp + fn)
 
                 values += [specificity, precision, recall]
                 new_labels = ["Specificity", "Precision", "Recall"]
@@ -64,7 +64,7 @@ class Metrics(object):
 
         self.values.append(values)
         self.batch_values = []
-        self.batch_errors = {n:[] for n in range(self.n_classes)}
+        self.batch_errors = {n: [] for n in range(self.n_classes)}
         self.labels = labels
 
         return labels, values

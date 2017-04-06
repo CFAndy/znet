@@ -132,7 +132,7 @@ def load_images(filenames, deterministic = False):
     return l, t, w, filenames
 
 def get_scan_name(filename):
-    scan_name = filename.replace('\\','/').split('/')[-1].split('_')[0]
+    scan_name = filename.replace('\\', '/').split('/')[-1].split('_')[0]
     return scan_name
 
 def train_splits_by_z(filenames, data_resolution = 0.5, n_splits = None):
@@ -159,7 +159,7 @@ def train_splits_by_z(filenames, data_resolution = 0.5, n_splits = None):
 
     for i, s in enumerate(splits):
         for r, scan, filenames_in_scan, n, offset in zip(resolutions, scan_names, scan_filenames, split_per_scan, random_offsets):
-            # n = int(np.round(r/data_resolution))
+            # n = int(np.round(r / data_resolution))
             start = offset[i % n]
             s += filenames_in_scan[start % n::n]
 

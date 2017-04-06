@@ -22,6 +22,4 @@ if __name__ == "__main__":
     image, origin, spacing = load_itk('data/original_lungs/subset0/1.3.6.1.4.1.14519.5.2.1.6279.6001.105756658031515062000744821260.mhd')
     print 'Shape:', image.shape
     print 'Origin:', origin
-    print 'Spacing:', spacing
-
-    
+    print 'Spacing:', spacing    

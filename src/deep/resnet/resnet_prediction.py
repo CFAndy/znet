@@ -18,7 +18,7 @@ def get_images_with_filenames(filenames):
     for image, target in zip(inputs, targets):
         ims, trs = testtime_augmentation(image[0], target) #Take color channel of image
         new_inputs += ims
-        new_targets+=trs
+        new_targets += trs
     new_filenames = []
     for fname in filenames:
         for i in range(int(len(new_inputs) / len(filenames))):
@@ -33,7 +33,7 @@ def main():
     filenames = glob.glob(P.FILENAMES_PREDICTION)
     batch_size = P.BATCH_SIZE_PREDICTION
     ### get augmentation number
-    test_im = np.zeros((64,64))
+    test_im = np.zeros((64, 64))
     n_testtime_augmentation = len(testtime_augmentation(test_im, 0)[0])
     #### get the parallel data generator
     gen = ParallelBatchIterator(get_images_with_filenames,
@@ -42,7 +42,7 @@ def main():
             multiprocess = False, n_producers = 12)
     ### get wide resnet caffe model
     caffe_net = caffe.Net(net_file, model_path, caffe.TEST)
-    ###do forward pass
+    ### do forward pass
     all_probabilities = []
     all_filenames = []
     print('begin predicting...')
@@ -59,11 +59,11 @@ def main():
             # print("one batch done")
         else:
             break
-    ### for all filenames get the probalilities(3*n_testtime_augmentation)
-    d = {f:[] for f in filenames}
+    ### for all filenames get the probalilities(3 * n_testtime_augmentation)
+    d = {f: [] for f in filenames}
     for probability, f in zip(all_probabilities, all_filenames):
         d[f].append(probability)
-    ### the code will no run unless the batch size is not the atomic batch size(3*n_testtime_augmentation)
+    ### the code will not run unless the batch size is not the atomic batch size(3 * n_testtime_augmentation)
     for key in d.keys():
         if len(d[key]) == 0:
             d.pop(key)
@@ -76,12 +76,12 @@ def main():
     for x in d.iteritems():
         fname, probabilities = x
         prob = np.mean(probabilities)
-        candidates_row = int(os.path.split(fname)[1].replace('.pkl.gz','')) - 2
-        data.append(list(candidates.iloc[candidates_row].values)[:-1] + [str(prob)])
+        candidates_row = int(os.path.split(fname)[1].replace('.pkl.gz', '')) - 2
+        data.append(list(candidates.iloc[candidates_row].values)[: -1] + [str(prob)])
     ### write the prob to a .csv
     submission = pd.DataFrame(columns = ['seriesuid', 'coordX', 'coordY', 'coordZ', 'probability'], data = data)
     submission_path = os.path.join(cur_dir, './../../../data/submission_subset45.csv')
-    submission.to_csv(submission_path, columns=['seriesuid', 'coordX', 'coordY', 'coordZ', 'probability'])
+    submission.to_csv(submission_path, columns = ['seriesuid', 'coordX', 'coordY', 'coordZ', 'probability'])
     print('finished!')
 
 if __name__ == '__main__':

@@ -19,13 +19,13 @@ def load_itk(filename):
     return numpyImage, numpyOrigin, numpySpacing
 
 def save_itk(image, origin, spacing, filename):
-    itkimage = sitk.GetImageFromArray(image, isVector=False)
+    itkimage = sitk.GetImageFromArray(image, isVector = False)
     itkimage.SetSpacing(spacing)
     itkimage.SetOrigin(origin)
     sitk.WriteImage(itkimage, filename, True)
 
 def reshape_image(imageDir, subsetDir):
-    if os.path.isfile(imageDir.replace('original',SAVE_FOLDER)) == False:
+    if os.path.isfile(imageDir.replace('original', SAVE_FOLDER)) == False:
         img, origin, spacing = load_itk(imageDir)
         print 'Processing', imageDir
         resize_factor = spacing / RESIZE_SPACING
@@ -39,7 +39,7 @@ def reshape_image(imageDir, subsetDir):
         origin = origin[::-1]
         new_spacing = new_spacing[::-1]
         print 'Saving', imageDir
-        save_itk(img,origin,new_spacing,imageDir.replace('original',SAVE_FOLDER))
+        save_itk(img, origin, new_spacing, imageDir.replace('original', SAVE_FOLDER))
 
 if __name__ == "__main__":
     subset = sys.argv[1]
@@ -48,5 +48,5 @@ if __name__ == "__main__":
 
     print "N images: ", len(imageNames)
     print "First 3", imageNames[:3]
-    Parallel(n_jobs=12)(delayed(reshape_image)(imageDir,subsetDir) for imageDir in imageNames)
+    Parallel(n_jobs = 12)(delayed(reshape_image)(imageDir, subsetDir) for imageDir in imageNames)
     print "Done!"
