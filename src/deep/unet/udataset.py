@@ -42,12 +42,13 @@ def get_image(filename, deterministic):
 
     if os.path.isfile(segmentation_filename):
         with gzip.open(segmentation_filename, 'rb') as f:
+            # print "segment file: ", segmentation_filename
             outside = np.where(pickle.load(f) > 0, 0, 1)
     else:
         outside = np.where(lung == 0, 1, 0)
         # print outside
         print 'lung masks are not found'
-    # print np.sum(truth), np.sum(outside)
+    # print "[1] truth number and outside number: ", np.sum(truth == 1), np.sum(outside)
 
     if P.ERODE_SEGMENTATION > 0:
         kernel = skimage.morphology.disk(P.ERODE_SEGMENTATION)
@@ -70,7 +71,8 @@ def get_image(filename, deterministic):
 
     truth = np.array(np.round(truth), dtype = np.int64)
     outside = np.array(np.round(outside), dtype = np.int64)
-
+    # print "[2] truth number and outside number: ", np.sum(truth == 1), np.sum(outside)
+    
     # Set label of outside pixels to -10
     truth = truth - (outside * 10)
 
@@ -95,6 +97,7 @@ def get_image(filename, deterministic):
 
     truth = np.array(np.expand_dims(np.expand_dims(truth, axis = 0), axis = 0), dtype = np.int64)
 
+    # print "[3] truth number and outside number: ", np.sum(truth == 1), np.sum(outside)
     return lung, truth
 
 def crop_or_pad(image, desired_size, pad_value):
@@ -118,6 +121,7 @@ def load_images(filenames, deterministic = False):
     # Weight the loss by class balancing, classes other than 0 and 1
     # get set to 0 (the background is -10)
     w = loss_weighting.weight_by_class_balance(t, classes = [0, 1])
+    # print w
 
     # Set -1 labels back to label 0
     t = np.clip(t, 0, 100000)

@@ -39,7 +39,7 @@ class DataLayer(caffe.Layer):
 
         top[0].reshape(self.batch_size, P.CHANNELS, INPUT_SIZE, INPUT_SIZE)
         top[1].reshape(self.batch_size, 1, OUTPUT_SIZE, OUTPUT_SIZE)
-        # top[2].reshape(self.batch_size, 1, OUTPUT_SIZE, OUTPUT_SIZE)
+        top[2].reshape(self.batch_size, 1, OUTPUT_SIZE, OUTPUT_SIZE)
 
     def forward(self, bottom, top):
         # print "datalayer start forward"
@@ -47,15 +47,15 @@ class DataLayer(caffe.Layer):
         if label.shape[0] != self.batch_size:
             top[0].reshape(data.shape[0], P.CHANNELS, INPUT_SIZE, INPUT_SIZE)
             top[1].reshape(label.shape[0], 1, OUTPUT_SIZE, OUTPUT_SIZE)
-            # top[2].reshape(label.shape[0], 1, OUTPUT_SIZE, OUTPUT_SIZE)
+            top[2].reshape(label.shape[0], 1, OUTPUT_SIZE, OUTPUT_SIZE)
             print ('reshape ', label.shape[0])
             top[0].data[...] = data.astype(np.float32, copy = False)
             top[1].data[...] = label.astype(np.float32, copy = False)
-            # top[2].data[...] = weights.astype(np.float32, copy = False)
+            top[2].data[...] = weights.astype(np.float32, copy = False)
         else:
             top[0].data[...] = data.astype(np.float32, copy = False)
             top[1].data[...] = label.astype(np.float32, copy = False)
-            # top[2].data[...] = weights.astype(np.float32, copy = False)
+            top[2].data[...] = weights.astype(np.float32, copy = False)
         # print ("read data\n")
         # sys.exit(0)
 
