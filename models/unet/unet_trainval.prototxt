@@ -22,7 +22,7 @@ layer {
   type: "Python"
   top: "data"
   top: "label"
-  top: "weight"
+  # top: "weight"
   include {
      phase: TEST
   }
