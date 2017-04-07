@@ -52,7 +52,7 @@ def draw_circles(image, cands, origin, spacing):
                 for z in noduleRange:
                     coords = world_2_voxel(np.array((coord_x + x, coord_y + y, coord_z + z)), origin, spacing)
                     if (np.linalg.norm(image_coord - coords) * RESIZE_SPACING[0]) < radius:
-                        image_mask[np.round(coords[0]), np.round(coords[1]), np.round(coords[2])] = int(1)
+                        image_mask[int(np.round(coords[0])), int(np.round(coords[1])), int(np.round(coords[2]))] = int(1)
 
     return image_mask
 
@@ -114,49 +114,51 @@ def create_slices(imagePath, maskPath, cads):
 
         # save the lung slice
         savePath = imagePath.replace('original_lungs', SAVE_FOLDER_image)
-        file = gzip.open(savePath.replace('.mhd', '_slice{}.pkl.gz'.format(z)), 'wb')
-        pickle.dump(lung_slice_512, file, protocol = -1)
-        pickle.dump(new_spacing, file, protocol = -1)
-        pickle.dump(new_origin, file, protocol = -1)
-        file.close()
+        f = gzip.open(savePath.replace('.mhd', '_slice{}.pkl.gz'.format(z)), 'wb')
+        pickle.dump(lung_slice_512, f, protocol = -1)
+        pickle.dump(new_spacing, f, protocol = -1)
+        pickle.dump(new_origin, f, protocol = -1)
+        f.close()
 
         savePath = imagePath.replace('original_lungs', SAVE_FOLDER_lung_mask)
-        file = gzip.open(savePath.replace('.mhd', '_slice{}.pkl.gz'.format(z)), 'wb')
-        pickle.dump(lung_mask_slice_512, file, protocol = -1)
-        pickle.dump(new_spacing, file, protocol = -1)
-        pickle.dump(new_origin, file, protocol = -1)
-        file.close()
+        f = gzip.open(savePath.replace('.mhd', '_slice{}.pkl.gz'.format(z)), 'wb')
+        pickle.dump(lung_mask_slice_512, f, protocol = -1)
+        pickle.dump(new_spacing, f, protocol = -1)
+        pickle.dump(new_origin, f, protocol = -1)
+        f.close()
 
         savePath = imagePath.replace('original_lungs', SAVE_FOLDER_nodule_mask)
-        file = gzip.open(savePath.replace('.mhd', '_slice{}.pkl.gz'.format(z)), 'wb')
-        pickle.dump(nodule_mask_slice_512, file, protocol = -1)
-        pickle.dump(new_spacing, file, protocol = -1)
-        pickle.dump(new_origin, file, protocol = -1)
-        file.close()
+        f = gzip.open(savePath.replace('.mhd', '_slice{}.pkl.gz'.format(z)), 'wb')
+        pickle.dump(nodule_mask_slice_512, f, protocol = -1)
+        pickle.dump(new_spacing, f, protocol = -1)
+        pickle.dump(new_origin, f, protocol = -1)
+        f.close()
 
         # Open File With following code:
-        # file = gzip.open(imagePath.replace('.mhd', '_slice{}.pkl.gz'.format(z)), 'rb')
-        # l_slice = pickle.load(file)
-        # l_spacing = pickle.load(file)
-        # l_origin = pickle.load(file)
-        # file.close()
+        # f = gzip.open(imagePath.replace('.mhd', '_slice{}.pkl.gz'.format(z)), 'rb')
+        # l_slice = pickle.load(f)
+        # l_spacing = pickle.load(f)
+        # l_origin = pickle.load(f)
+        # f.close()
 
 def createImageList(subset, cads):
     imagesWithNodules = []
-    subsetDir = 'data\\original_lungs\\subset{}'.format(subset)
+    cur_dir = os.path.dirname(os.path.abspath(__file__))
+    subsetDir = '{}/../../data/original_lungs/subset{}'.format(cur_dir, subset)
     imagePaths = glob.glob("{}/*.mhd".format(subsetDir))
     for imagePath in imagePaths:
         imageName = os.path.split(imagePath)[1].replace('.mhd', '')
-        if len(cads[cads['seriesuid'] == imageName].index.tolist()) != 0: # dit moet efficienter kunnen!
+        if len(cads[cads['seriesuid'] == imageName].index.tolist()) != 0:
             imagesWithNodules.append(imagePath)
     return imagesWithNodules
 
 if __name__ == "__main__":
-    cads = pd.read_csv("csv\\annotations.csv")
+    cur_dir = os.path.dirname(os.path.abspath(__file__))
+    cads = pd.read_csv(os.path.join(cur_dir, "./../../csv/annotations.csv"))
     for subset in range(10):
     	start_time = time.time()
         print '{} - Processing subset'.format(time.strftime("%H:%M:%S")), subset
         imagePaths = createImageList(subset, cads)
-        Parallel(n_jobs = 4)(delayed(create_slices)(imagePath, imagePath.replace('original_lungs\\subset{}'.format(subset), 'original_lung_masks'), cads) for imagePath in imagePaths)
+        Parallel(n_jobs = 4)(delayed(create_slices)(imagePath, imagePath.replace('original_lungs/subset{}'.format(subset), 'original_lung_masks'), cads) for imagePath in imagePaths)
         print '{} - Processing subset {} took {} seconds'.format(time.strftime("%H:%M:%S"), subset, np.floor(time.time() - start_time))
         print

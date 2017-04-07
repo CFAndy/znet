@@ -27,33 +27,26 @@ def get_image(filename, deterministic):
         lung = pickle.load(f)
 
     np.set_printoptions(threshold = 'nan')
-    segmentation_filename = filename.replace('lung', 'lung_masks')
 
-    # get nodule through bounding box
-    truth_filename = filename.replace('lung','bbox')
-    truth = np.zeros_like(lung)
+    segmentation_filename = filename.replace('lung', 'lung_masks')
+    truth_filename = filename.replace('lung', 'nodule')
+    if os.path.isfile(truth_filename):
+        with gzip.open(truth_filename,'rb') as f:
+            truth = np.array(pickle.load(f), dtype = np.float32)
+    else:
+        truth = np.zeros_like(lung)
+
     # print np.sum(truth)
     # print truth.shape
     # print truth_filename
-    with gzip.open(truth_filename, 'rb') as f:
-        bb = pickle.load(f)[0]
-        for i in xrange(len(bb)):
-            y1, x1 = bb[i][0:2]
-            y2, x2 = bb[i][2:4]
-            x1 = int(x1)
-            y1 = int(y1)
-            x2 = int(x2 + 1)
-            y2 = int(y2 + 1)
-            # print x1, y1, x2, y2
-            truth[x1:x2, y1:y2] = 1
 
     if os.path.isfile(segmentation_filename):
-        with gzip.open(segmentation_filename,'rb') as f:
+        with gzip.open(segmentation_filename, 'rb') as f:
             outside = np.where(pickle.load(f) > 0, 0, 1)
     else:
         outside = np.where(lung == 0, 1, 0)
         # print outside
-        # print 'lung not found'
+        print 'lung masks are not found'
     # print np.sum(truth), np.sum(outside)
 
     if P.ERODE_SEGMENTATION > 0:
