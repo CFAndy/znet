@@ -7,7 +7,7 @@ layer {
   type: "Python"
   top: "data"
   top: "label"
-  top: "weight"
+  # top: "weight"
   include {
      phase: TRAIN
   }
@@ -999,7 +999,7 @@ layer {
 layer {
     bottom: "score"
     bottom: "label"
-    bottom: "weight"
+    # bottom: "weight"
     top: "loss"
     name: "loss"
     type: "SoftmaxWithLoss"
@@ -1021,9 +1021,6 @@ layer {
   bottom: "prob"
   bottom: "label"
   top: "top1"
-  accuracy_param {
-      ignore_label: -10
-  }
   include {
      phase: TEST
   }

@@ -31,7 +31,7 @@ def get_image(filename, deterministic):
     segmentation_filename = filename.replace('lung', 'lung_masks')
     truth_filename = filename.replace('lung', 'nodule')
     if os.path.isfile(truth_filename):
-        with gzip.open(truth_filename,'rb') as f:
+        with gzip.open(truth_filename, 'rb') as f:
             truth = np.array(pickle.load(f), dtype = np.float32)
     else:
         truth = np.zeros_like(lung)
@@ -132,7 +132,7 @@ def train_splits_by_z(filenames, data_resolution = 0.5, n_splits = None):
     import pandas as pd
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
-    zspacing_file = os.path.join(cur_dir, "./../../../data/luna2016/imagename_zspacing.csv")
+    zspacing_file = os.path.join(cur_dir, "./../../../data/imagename_zspacing.csv")
     resolution_of_scan = pd.read_csv(zspacing_file, header = None, names = ['filename', 'spacing'], index_col = False)
 
     scan_names = set(map(get_scan_name, filenames))
