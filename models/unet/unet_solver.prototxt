@@ -8,12 +8,12 @@ test_compute_loss: true
 display: 20 # 1550
 average_loss: 40
 base_lr: 0.0001
-lr_policy: "fixed" # "step"
-# stepsize: 320000
-# gamma: 0.96
+lr_policy: "step"
+stepsize: 8000
+gamma: 0.1
 momentum: 0.99
 regularization_type: "L2"
 weight_decay: 1e-5
 max_iter: 311061
-snapshot: 40000
+snapshot: 8000
 snapshot_prefix: "../../../snapshots/unet"

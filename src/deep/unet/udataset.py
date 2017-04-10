@@ -23,6 +23,7 @@ OUTPUT_SIZE = output_size_for_input(INPUT_SIZE, NET_DEPTH)
 _EPSILON = 1e-8
 
 def get_image(filename, deterministic):
+    # print filename
     with gzip.open(filename,'rb') as f:
         lung = pickle.load(f)
 
@@ -94,6 +95,12 @@ def get_image(filename, deterministic):
 
     if P.ZERO_CENTER:
         lung = lung - P.MEAN_PIXEL
+
+    if P.GAUSSIAN_NOISE > 0:
+        sigma = P.GAUSSIAN_NOISE
+        mean = 0.0
+        gauss = np.random.normal(mean, sigma, lung.shape)
+        lung = lung + gauss
 
     truth = np.array(np.expand_dims(np.expand_dims(truth, axis = 0), axis = 0), dtype = np.int64)
 

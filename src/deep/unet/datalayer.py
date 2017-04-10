@@ -47,7 +47,7 @@ class DataLayer(caffe.Layer):
         if label.shape[0] != self.batch_size:
             top[0].reshape(data.shape[0], P.CHANNELS, INPUT_SIZE, INPUT_SIZE)
             top[1].reshape(label.shape[0], 1, OUTPUT_SIZE, OUTPUT_SIZE)
-            top[2].reshape(label.shape[0], 1, OUTPUT_SIZE, OUTPUT_SIZE)
+            top[2].reshape(weights.shape[0], 1, OUTPUT_SIZE, OUTPUT_SIZE)
             print ('reshape ', label.shape[0])
             top[0].data[...] = data.astype(np.float32, copy = False)
             top[1].data[...] = label.astype(np.float32, copy = False)
@@ -97,7 +97,7 @@ class ValDataLayer(caffe.Layer):
         if label.shape[0] != self.batch_size:
             top[0].reshape(data.shape[0], P.CHANNELS, INPUT_SIZE, INPUT_SIZE)
             top[1].reshape(label.shape[0], 1, OUTPUT_SIZE, OUTPUT_SIZE)
-            top[2].reshape(label.shape[0], 1, OUTPUT_SIZE, OUTPUT_SIZE)
+            top[2].reshape(weights.shape[0], 1, OUTPUT_SIZE, OUTPUT_SIZE)
             print ('reshape ', label.shape[0])
             top[0].data[...] = data.astype(np.float32, copy = False)
             top[1].data[...] = label.astype(np.float32, copy = False)
@@ -106,6 +106,8 @@ class ValDataLayer(caffe.Layer):
             top[0].data[...] = data.astype(np.float32, copy = False)
             top[1].data[...] = label.astype(np.float32, copy = False)
             top[2].data[...] = weights.astype(np.float32, copy = False)
+        # data_nan_num = np.sum(np.isnan(top[0].data[...]))
+        # print "data nan number: ", data_nan_num
         # print ("read data\n")
 
     def backward(self, top, propagate_down, bottom):
