@@ -1003,6 +1003,9 @@ layer {
     top: "loss"
     name: "loss"
     type: "SoftmaxWithLoss"
+    loss_param {
+      normalization: VALID
+    }
 }
 
 layer {
