@@ -26,7 +26,7 @@ def augment(images):
     shift_y = np.random.uniform(*P.AUGMENTATION_PARAMS['translation_range'])
     rotation_degrees = np.random.uniform(*P.AUGMENTATION_PARAMS['rotation_range'])
     zoom_factor = np.random.uniform(*P.AUGMENTATION_PARAMS['zoom_range'])
-    # zoom_factor = 1 + (zoom_f/2-zoom_f*np.random.random())
+    # zoom_factor = 1 + (zoom_f / 2 - zoom_f * np.random.random())
     if CV2_AVAILABLE:
         # print center, rotation_degrees, zoom_factor
         M = cv2.getRotationMatrix2D((center, center), rotation_degrees, zoom_factor)
@@ -38,30 +38,30 @@ def augment(images):
         image = images[i]
 
         if CV2_AVAILABLE:
-            # image = image.transpose(1,2,0)
+            # image = image.transpose(1, 2, 0)
             image = cv2.warpAffine(image, M, (pixels, pixels))
             if random_flip_x:
                 image = cv2.flip(image, 0)
             if random_flip_y:
                 image = cv2.flip(image, 1)
-            # image = image.transpose(2,0,1)
+            # image = image.transpose(2, 0, 1)
             images[i] = image
         else:
             if random_flip_x:
                 # image = image.transpose(1,0)
-                image[:,:] = image[::-1,:]
+                image[:, :] = image[::-1, :]
                 # image = image.transpose(1,0)
             if random_flip_y:
-                image = image.transpose(1,0)
-                image[:,:] = image[::-1,:]
-                image = image.transpose(1,0)
+                image = image.transpose(1, 0)
+                image[:, :] = image[::-1, :]
+                image = image.transpose(1, 0)
 
-            rotate(image, rotation_degrees, reshape = False, output=image)
+            rotate(image, rotation_degrees, reshape = False, output = image)
             # image2 = zoom(image, [zoom_factor,zoom_factor])
             image2 = crop_or_pad(image, pixels, -3000)
-            shift(image2, [shift_x,shift_y], output=image)
-            # affine_transform(image, np.array([[zoom_x,0], [0,zoom_x]]), output = image)
-            # z = AffineTransform(scale=(2,2))
+            shift(image2, [shift_x, shift_y], output = image)
+            # affine_transform(image, np.array([[zoom_x, 0], [0, zoom_x]]), output = image)
+            # z = AffineTransform(scale = (2, 2))
             # image = warp(image, z.params)
             images[i] = image
 
@@ -70,7 +70,7 @@ def augment(images):
 def crop_or_pad(image, desired_size, pad_value):
     if image.shape[0] < desired_size:
         offset = (desired_size-image.shape[0]) // 2
-        image = np.pad(image, offset, 'constant', constant_values=pad_value)
+        image = np.pad(image, offset, 'constant', constant_values = pad_value)
         if image.shape[0] != desired_size:
             new_image = np.full((image.shape[0] + 1, image.shape[1] + 1), fill_value = pad_value)
             new_image[:image.shape[0], :image.shape[1]] = image
@@ -105,16 +105,16 @@ def testtime_augmentation(image, label):
                 for z in zooms:
                     image2 = np.array(image)
                     if f[0]:
-                        image2[:,:] = image2[::-1,:]
+                        image2[:, :] = image2[::-1, :]
                     if f[1]:
                         image2 = image2.transpose(1, 0)
-                        image2[:,:] = image2[::-1,:]
+                        image2[:, :] = image2[::-1, :]
                         image2 = image2.transpose(1, 0)
-                    # rotate(image2, r, reshape=False, output=image2)
-                    # image3 = zoom(image2, [z,z])
+                    # rotate(image2, r, reshape = False, output = image2)
+                    # image3 = zoom(image2, [z, z])
                     # image3 = crop_or_pad(image3, P.INPUT_SIZE, 0)
                     # image2 = image3
-                    # shift(image2, [s[0],s[1]], output=image2)
+                    # shift(image2, [s[0],s[1]], output = image2)
                     images.append([image2]) # Adds color channel dimension!
                     labels.append(label)
 
