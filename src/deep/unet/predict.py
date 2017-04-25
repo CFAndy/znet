@@ -28,7 +28,7 @@ if __name__ == "__main__":
     net_file = sys.argv[2]
 
     ### load all predicting filenames
-    file_names = glob.glob(P.FILENAMES_PREDICTION)
+    file_names = glob(P.FILENAMES_PREDICTION)
     batch_size = P.BATCH_SIZE_PREDICTION
 
     multiprocess = False
@@ -39,18 +39,19 @@ if __name__ == "__main__":
 
     caffe_net = caffe.Net(net_file, model_file, caffe.TEST)
 
-    predictions_folder = os.path.join(model_file, '_predictions')
+    predictions_folder = model_file + '_predictions'
     util.make_dir_if_not_present(predictions_folder)
 
+    all_probabilities = []
+    all_filenames = []
     for i, batch in enumerate(tqdm(gen)):
-        inputs, _, weights, fnames = batch
+        inputs, labels, weights, fnames = batch
 
-        if data.shape[0] == batch_size:
-            caffe_net.blobs['data'].data[...] = data.astype(np.float32, copy = False)
-            caffe_net.blobs['label'].data[...] = label.astype(np.float32, copy = False)
+        if inputs.shape[0] == batch_size:
+            caffe_net.blobs['data'].data[...] = inputs.astype(np.float32, copy = False)
             caffe_net.forward()
             softmax_out = caffe_net.blobs['prob'].data.copy()
-            all_probabilities += list(softmax_out[:, 1].tolist())
+            all_probabilities += list(softmax_out[:, 1, :, :].tolist())
             all_filenames += list(fnames)
             # print("one batch done")
         else:
@@ -67,7 +68,7 @@ if __name__ == "__main__":
             f = os.path.join(predictions_folder, f + '.png')
             out_size = output_size_for_input(inputs.shape[3], NET_DEPTH)
             image_size = out_size ** 2
-            image = predictions[n * image_size : (n + 1) * image_size][:, 1].reshape(out_size, out_size)
+            image = softmax_out[n, 1, :, :].reshape(out_size, out_size)
 
             # Remove parts outside a few pixels from the lungs
             image = image * np.where(weights[n, 0, :, :] == 0, 0, 1)

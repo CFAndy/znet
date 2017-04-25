@@ -10,14 +10,6 @@ input_shape {
   dim: 512
 }
 
-input: "label"
-input_shape {
-  dim: 2
-  dim: 1
-  dim: 512
-  dim: 512
-}
-
 ## contraction
 # contraction 0
 layer {
@@ -738,16 +730,5 @@ layer {
     type: "Softmax"
     bottom: "score"
     top: "prob"
-}
-
-layer {
-  name: "top1"
-  type: "Accuracy"
-  bottom: "prob"
-  bottom: "label"
-  top: "top1"
-  accuracy_param {
-      ignore_label: -10
-  }
 }
 
