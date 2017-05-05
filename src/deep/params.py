@@ -98,5 +98,5 @@ class Params():
 
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 unet_params = Params([os.path.join(cur_dir, "../../config/default.ini")] + [os.path.join(cur_dir, '../../config/unet_splits/split01.ini')])
-unet_prediction_params = Params([os.path.join(cur_dir, "../../config/default.ini")] + [os.path.join(cur_dir, '../../config/split01.ini')])
-wrn_params = Params([os.path.join(cur_dir, "../../config/default.ini")] + [os.path.join(cur_dir, "../../config/resnet56_3_diag.ini")])
+unet_prediction_params = Params([os.path.join(cur_dir, "../../config/default.ini")] + [os.path.join(cur_dir, '../../config/unet_splits/unet_prediction.ini')])
+wrn_params = Params([os.path.join(cur_dir, "../../config/default.ini")] + [os.path.join(cur_dir, "../../config/resnet01_diag.ini")])

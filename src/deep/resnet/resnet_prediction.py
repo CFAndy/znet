@@ -80,7 +80,7 @@ def main():
         data.append(list(candidates.iloc[candidates_row].values)[: -1] + [str(prob)])
     ### write the prob to a .csv
     submission = pd.DataFrame(columns = ['seriesuid', 'coordX', 'coordY', 'coordZ', 'probability'], data = data)
-    submission_path = os.path.join(cur_dir, './../../../data/submission_subset45.csv')
+    submission_path = os.path.join(cur_dir, './../../../data/submission_subset01.csv')
     submission.to_csv(submission_path, columns = ['seriesuid', 'coordX', 'coordY', 'coordZ', 'probability'])
     print('finished!')
 
