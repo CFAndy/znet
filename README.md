@@ -20,34 +20,41 @@ Then, download `imagename_zspacing.csv` from [here](https://gzuidhof.stackstorag
 
 ### Unet training
 ```
-src/deep/unet/unet_trainer.py <config>
+src/deep/unet/caffe_unet_train.sh
 ```
 
-Example conifg `config/unet_splits/split01.ini`. Repeat this for each of the splits.
+Parameter config is in params.py
 
 ### Unet held out set dense predictions
 ```
-src/deep/predict <model_name> <epoch>
+src/deep/caffe_unet_predict.sh
 ```
-When training a model a  folder is created in `/models`. The folder name is the model name here. Manually look up which epoch had the lowest validation set loss and was a checkpoint.
+When training a model a  folder is created in `/snapshots/unet`. The folder name is the model name here. Manually look up which epoch had the lowest validation set loss and was a checkpoint.
 
 ### Unet dense predictions -> candidates:
-This part is likely hard to redo using our code, as it was done by manually editing the scripts. This part is however the easiest conceptually and clearly described in our method description on the Luna competition page. To go from dense prediction to the initial set without postprocessing you can look at `src/candidates.py`. You will have to edit line 30.
+```
+cp -rf ./snapshots/unet_iter_311061.caffemodel_predictions/* ./results
+python candidates.py
+python candidate_merging.py
+
+a finalizedcandidates_unet_ALL.csv will be generated in data folder
+```
 
 ## False positive reduction (Wide ResNet)
 
 ### Preprocessing:
-We performed this on a large cluster (using up to 20 nodes simoultaneously, this may take very long on a single machine). First we equalize the spacings tp 0.5mm*0.5mm*0.5mm using `src/data_processing/equalize_spacings.py`.  Then we create the 96x96 patches in all three orientations using `src/data_processing/create_xy_xz_yz_CARTESIUS.py`.
-Scripts to perform this using SLURM for job management (will require some editing of paths) can be found in `/scripts/create_patches/` and `/scripts/rescale`.
+```
+cp ./data/finalizedcandidates_unet_ALL.csv ./csv
+. ./src/data_processing/create_wrn_input.sh
+```
 
 ### Training
-`python train.py <config>` in `/src/deep`  
-Configurations: `https://github.com/gzuidhof/luna16/blob/master/config/resnet56_X_diag.ini`  with X 0 through 9.
+. ./src/deep/resnet/caffe_resnet_train.sh
 
 ### Predict
 
 ```
-src/deep/predict_resnet <model_name> <epoch> <which subsets to predict>
+. ./src/deep/resnet/caffe_resnet_predict.sh
 ```
 
 The prediction CSV can then be found in the model folder. All you have to do now is combine these. You could use `src/ensembleSubmissions.py` for this, which also features some equalization of predictions of the different models.

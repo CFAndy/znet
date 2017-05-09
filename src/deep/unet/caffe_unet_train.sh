@@ -22,5 +22,6 @@ unset MKL_THREADING_LAYER
 export KMP_AFFINITY=compact,1,0,granularity=fine
 
 solver_proto="${cur_dir}/../../../models/unet/unet_solver.prototxt"
-checkpoint="${cur_dir}/../../../snapshots/unet_iter_256000.solverstate"
-../../../caffe/build/tools/caffe train --solver=${solver_proto} -snapshot=${checkpoint}
+# checkpoint="${cur_dir}/../../../snapshots/unet_iter_256000.solverstate"
+../../../caffe/build/tools/caffe train --solver=${solver_proto}
+# -snapshot=${checkpoint}

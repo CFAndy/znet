@@ -42,11 +42,11 @@ def check_coordinates2(image_coord, candidate):
 
 
 def is_candidate(image_coord, image_annotations):
-    #print annotations['seriesuid']
-    #print image_name
+    # print annotations['seriesuid']
+    # print image_name
 
-    #print "Amount of actual nodules:",len(image_annotations.values)
-    #if len(image_annotations.values) > 0:
+    # print "Amount of actual nodules: ", len(image_annotations.values)
+    # if len(image_annotations.values) > 0:
     #    exit()
 
     for candidate in image_annotations.values:
@@ -86,7 +86,7 @@ def evaluate(train_candidates):
             index = np.where(annotations.values == can.all())[0]
             index = index[0]
             found_candidates[index].append([can[1], can[2], can[3]])
-            nr_candidates -= 1
+            # nr_candidates -= 1
 
     # for ann in image_annotations.values:
     #     index = np.where(annotations.values==ann.all())[0]
@@ -99,7 +99,8 @@ def evaluate(train_candidates):
             found += 1
     if nr_annotations != 0:
          print "recall", float(found) / nr_annotations
-         print "precision", float(found) / nr_candidates
+         if nr_candidates != 0:
+             print "precision", float(found) / nr_candidates
 
 
 # In found_candidates there can be multiple entries that belong to the same annotation, these have to be averaged to find the center of the blob.

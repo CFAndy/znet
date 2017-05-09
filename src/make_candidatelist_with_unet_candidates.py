@@ -61,7 +61,7 @@ def mergeCandidates(annotation, possibleCandidates):
     return np.mean(x), np.mean(y), np.mean(z), found
 
 
-DISTANCE = 10
+DISTANCE = 30
 
 # This fucntion makes the final list, this list exist of TPcandidate and FPcandidates,
 # if they are not lying too close to a TPcandidate given in the annotation.csv
