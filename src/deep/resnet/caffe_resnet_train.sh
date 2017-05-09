@@ -10,7 +10,7 @@ caffe_path="${cur_dir}/../../../caffe/python"
 export PYTHONPATH=${znet_path}:${caffe_path}:$PYTHONPATH
 echo $PYTHONPATH
 
-# export GLOG_minloglevel=2
+export GLOG_minloglevel=0
 
 unset OMP_NUM_THREADS
 # export OMP_NUM_THREADS=44

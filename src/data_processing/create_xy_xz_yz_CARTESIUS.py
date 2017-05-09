@@ -36,7 +36,7 @@ def process_image(image_path, candidates, save_dir):
     image = scipy.ndimage.interpolation.zoom(image, real_resize)
 
     # Pad image with offset (OUTPUT_DIM/2) to prevent problems with candidates on edge of image
-    offset = OUTPUT_DIM / 2
+    offset = OUTPUT_DIM // 2
     image = np.pad(image,offset, 'constant', constant_values = 0)
     print 'image', image_path, 'zoomed and padded'
     # Make a indixlist of the candidates of the image
@@ -54,9 +54,12 @@ def process_image(image_path, candidates, save_dir):
         coords = np.floor(world_2_voxel(world_coords, origin, new_spacing)) + offset
         label = row.label
 
+        # print coords
+        coords = coords.astype(np.int_, copy = False)
+
         # Create xy, xz, yz
         xy_slice = np.transpose(image[coords[0] - offset : coords[0] + offset, coords[1] - offset : coords[1] + offset, coords[2]])
-        xz_slice = np.rot90(image[coords[0] - offset : coords[0] + offset,coords[1], coords[2] - offset : coords[2] + offset])
+        xz_slice = np.rot90(image[coords[0] - offset : coords[0] + offset, coords[1], coords[2] - offset : coords[2] + offset])
         yz_slice = np.rot90(image[coords[0], coords[1] - offset : coords[1] + offset, coords[2] - offset : coords[2] + offset])
 
         # UNCOMMENT THESE LINES IF YOU WANT TO MANUALLY COMPARE IMAGES WITH MEVISLAB
@@ -91,6 +94,8 @@ def process_image(image_path, candidates, save_dir):
         # save with gzip/pickle
         with gzip.open(save_path, 'wb') as f:
         	pickle.dump(output, f, protocol = -1)
+
+        # print "save done"
 
         # UNCOMMENT IF YOU WANT TO TEST WHETHER SAVING WORKED
         # with gzip.open(save_path,'rb') as f:

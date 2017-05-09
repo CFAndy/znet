@@ -14,8 +14,8 @@ import evaluate_candidates
 import operator
 import evaluate_candidates
 
-ANNOTATIONLOCATION = '../data/annotations.csv'
-MHDLOCATIONS = '../data/seg-lungs-LUNA16\\'
+ANNOTATIONLOCATION = '../csv/annotations.csv'
+MHDLOCATIONS = '../data/original_lungs/'
 
 DO_OUTSIDE_LUNG_REMOVAL = False
 
@@ -81,16 +81,16 @@ def distance_lungonly_merge(parentdict, file, size):
         data_per_slice = np.array(data_per_slice)
         if (len(data_per_slice) > 0):
             data_per_slice = candidates.merge_candidates_scan(data_per_slice, seriesuid = imagename, distance = size)
-            data_per_slice.to_csv(directory  + '/'  + imagename + '.csv', index = False)
+            data_per_slice.to_csv(os.path.join(directory, imagename + '.csv'), index = False)
     merge_csv(directory, parentdict, file, 'merged')
     print('done')
 
     print('lung-only extraction...')
-    directory = parentdict + '/' + file + 'Removed'
+    directory = os.path.join(parentdict, file + 'Removed')
     if not os.path.exists(directory):
         os.makedirs(directory)
     information_per_slice = defaultdict(list)
-    with open(parentdict + '/merged' + file + '.csv', mode = 'r') as infile:
+    with open(os.path.join(parentdict, 'merged' + file + '.csv'), mode = 'r') as infile:
         reader = csv.reader(infile)
         next(reader)
         for rows in reader:
@@ -100,22 +100,24 @@ def distance_lungonly_merge(parentdict, file, size):
         data_per_slice = np.array(data_per_slice)
         if (len(data_per_slice) > 0):
             data_per_slice = candidates.merge_candidates_scan(data_per_slice, seriesuid = imagename, distance = 0)
-            data_per_slice.to_csv(directory + '/' + imagename + '.csv', index = False)
+            data_per_slice.to_csv(os.path.join(directory, imagename + '.csv'), index = False)
     merge_csv(directory, parentdict, file, 'removed')
     print('done')
+ 
     print('TPFPmerging...')
-    candidates2 = pd.read_csv(parentdict + '/removed' + file + '.csv')
+    candidates2 = pd.read_csv(os.path.join(parentdict, 'removed' + file + '.csv'))
     mergedTPCandidatesAndFPCandidates = pd.DataFrame()
     annotation = pd.read_csv(ANNOTATIONLOCATION)
     mergedTPCandidatesAndFPCandidates = mcwuc.fillTPCandidateList(candidates2, annotation, mergedTPCandidatesAndFPCandidates)
-    mergedTPCandidatesAndFPCandidates.to_csv(parentdict + '/finalized' + file + '.csv', columns=['seriesuid', 'coordX', 'coordY', 'coordZ', 'label'], index = False)
+    mergedTPCandidatesAndFPCandidates.to_csv(os.path.join(parentdict, 'finalized' + file + '.csv'), columns = ['seriesuid', 'coordX', 'coordY', 'coordZ', 'label'], index = False)
     print('done')
+ 
     print('postfixing...')
-    directory = parentdict + '/' + file + 'Finalized'
+    directory = os.path.join(parentdict, file + 'Finalized')
     if not os.path.exists(directory):
         os.makedirs(directory)
         information_per_slice = defaultdict(list)
-    with open(parentdict + '/finalized' + file + '.csv', mode = 'r') as infile:
+    with open(os.path.join(parentdict, 'finalized' + file + '.csv'), mode = 'r') as infile:
         reader = csv.reader(infile)
         next(reader)
         for rows in reader:
@@ -124,9 +126,10 @@ def distance_lungonly_merge(parentdict, file, size):
         data_per_slice = np.array(data_per_slice)
         if (len(data_per_slice) > 0):
             data_per_slice = candidates.merge_candidates_scan(data_per_slice, seriesuid = imagename, distance = 0)
-            data_per_slice.to_csv(directory + '/' + imagename + '.csv', index = False)
+            data_per_slice.to_csv(os.path.join(directory, imagename + '.csv'), index = False)
     merge_csv(directory, parentdict, file, 'finalizedExtra')
     print('done')
+
     print('recall/precision calculating...')
     file = parentdict + 'finalizedExtra' + file + '.csv'
     candidates3 = ca.load_candidates(file, False)

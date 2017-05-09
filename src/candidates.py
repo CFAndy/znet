@@ -101,7 +101,7 @@ def candidates_to_image(cands, radius):
     previous_candidate = ""
     images = []
     image = []
-    origin = []
+    grigin = []
     spacing = []
     number = 0
     for candidate in tqdm(cands.values):
@@ -139,7 +139,7 @@ def merge_candidates_scan(candidates, seriesuid, distance = 5.):
     distances = pdist(candidates, metric = 'euclidean')
     adjacency_matrix = squareform(distances)
     # Determine nodes within distance, replace by 1 (=adjacency matrix)
-    adjacency_matrix = np.where(adjacency_matrix<=distance, 1, 0)
+    adjacency_matrix = np.where(adjacency_matrix <= distance, 1, 0)
 
     # Determine all connected components in the graph
     n, labels = connected_components(adjacency_matrix)

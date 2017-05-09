@@ -21,7 +21,7 @@ unset MKL_THREADING_LAYER
 # export MKL_THREADING_LAYER=gnu
 export KMP_AFFINITY=compact,1,0,granularity=fine
 
-model_path="${cur_dir}/../../../wrn_weight/_iter_58.caffemodel"
+model_path="${cur_dir}/../../../snapshots/_iter_58.caffemodel"
 echo ${model_path}
 proto_path="${cur_dir}/../../../models/wrn/wide_resnet_prediction.prototxt"
 echo ${proto_path}

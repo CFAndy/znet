@@ -66,7 +66,7 @@ if __name__ == "__main__":
             # Filename only
             subdir = os.path.basename(os.path.dirname(f))
             f = os.path.basename(f)
-            sub_folder = os.path.join(prediction_foler, sub_folder)
+            sub_folder = os.path.join(predictions_folder, subdir)
             util.make_dir_if_not_present(sub_folder)
             f = os.path.join(sub_folder, f + '.png')
             out_size = output_size_for_input(inputs.shape[3], NET_DEPTH)
