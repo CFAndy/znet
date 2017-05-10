@@ -66,13 +66,13 @@ def merge_csv(inputdirec, outputdirec, file, type):
     frame = pd.DataFrame(dataf)
     frame.to_csv(os.path.join(outputdirec, type + file + '.csv'), index = False)
 
-def distance_lungonly_merge(parentdict, file, size):
+def distance_lungonly_merge(parentdict, f, size):
     print('distance merging...')
     information_per_slice = defaultdict(list)
-    directory = parentdict + file + 'Output'
+    directory = parentdict + f + 'Output'
     if not os.path.exists(directory):
         os.makedirs(directory)
-    with open(parentdict + file + '.csv', mode = 'r') as infile:
+    with open(parentdict + f + '.csv', mode = 'r') as infile:
         reader = csv.reader(infile)
         next(reader)
         for rows in reader:
@@ -82,15 +82,15 @@ def distance_lungonly_merge(parentdict, file, size):
         if (len(data_per_slice) > 0):
             data_per_slice = candidates.merge_candidates_scan(data_per_slice, seriesuid = imagename, distance = size)
             data_per_slice.to_csv(os.path.join(directory, imagename + '.csv'), index = False)
-    merge_csv(directory, parentdict, file, 'merged')
+    merge_csv(directory, parentdict, f, 'merged')
     print('done')
 
     print('lung-only extraction...')
-    directory = os.path.join(parentdict, file + 'Removed')
+    directory = os.path.join(parentdict, f + 'Removed')
     if not os.path.exists(directory):
         os.makedirs(directory)
     information_per_slice = defaultdict(list)
-    with open(os.path.join(parentdict, 'merged' + file + '.csv'), mode = 'r') as infile:
+    with open(os.path.join(parentdict, 'merged' + f + '.csv'), mode = 'r') as infile:
         reader = csv.reader(infile)
         next(reader)
         for rows in reader:
@@ -101,23 +101,23 @@ def distance_lungonly_merge(parentdict, file, size):
         if (len(data_per_slice) > 0):
             data_per_slice = candidates.merge_candidates_scan(data_per_slice, seriesuid = imagename, distance = 0)
             data_per_slice.to_csv(os.path.join(directory, imagename + '.csv'), index = False)
-    merge_csv(directory, parentdict, file, 'removed')
+    merge_csv(directory, parentdict, f, 'removed')
     print('done')
  
     print('TPFPmerging...')
-    candidates2 = pd.read_csv(os.path.join(parentdict, 'removed' + file + '.csv'))
+    candidates2 = pd.read_csv(os.path.join(parentdict, 'removed' + f + '.csv'))
     mergedTPCandidatesAndFPCandidates = pd.DataFrame()
     annotation = pd.read_csv(ANNOTATIONLOCATION)
     mergedTPCandidatesAndFPCandidates = mcwuc.fillTPCandidateList(candidates2, annotation, mergedTPCandidatesAndFPCandidates)
-    mergedTPCandidatesAndFPCandidates.to_csv(os.path.join(parentdict, 'finalized' + file + '.csv'), columns = ['seriesuid', 'coordX', 'coordY', 'coordZ', 'label'], index = False)
+    mergedTPCandidatesAndFPCandidates.to_csv(os.path.join(parentdict, 'finalized' + f + '.csv'), columns = ['seriesuid', 'coordX', 'coordY', 'coordZ', 'label'], index = False)
     print('done')
  
     print('postfixing...')
-    directory = os.path.join(parentdict, file + 'Finalized')
+    directory = os.path.join(parentdict, f + 'Finalized')
     if not os.path.exists(directory):
         os.makedirs(directory)
         information_per_slice = defaultdict(list)
-    with open(os.path.join(parentdict, 'finalized' + file + '.csv'), mode = 'r') as infile:
+    with open(os.path.join(parentdict, 'finalized' + f + '.csv'), mode = 'r') as infile:
         reader = csv.reader(infile)
         next(reader)
         for rows in reader:
@@ -127,12 +127,12 @@ def distance_lungonly_merge(parentdict, file, size):
         if (len(data_per_slice) > 0):
             data_per_slice = candidates.merge_candidates_scan(data_per_slice, seriesuid = imagename, distance = 0)
             data_per_slice.to_csv(os.path.join(directory, imagename + '.csv'), index = False)
-    merge_csv(directory, parentdict, file, 'finalizedExtra')
+    merge_csv(directory, parentdict, f, 'finalizedExtra')
     print('done')
 
     print('recall/precision calculating...')
-    file = parentdict + 'finalizedExtra' + file + '.csv'
-    candidates3 = ca.load_candidates(file, False)
+    f2 = parentdict + 'finalizedExtra' + f + '.csv'
+    candidates3 = ca.load_candidates(f2, False)
     evaluate_candidates.run(candidates3)
     print('done')
 
@@ -176,14 +176,14 @@ def froc_analyse(csvfile):
         for rows in reader:
             FPrate[float(rows[0])].extend(map(float, rows[1:4]))
     for a in range(-3, 4):
-        closest = min(FPrate.keys(), key = lambda x: abs(x - 2 ** a))
+        closest = min(FPrate.keys(), key = lambda x : abs(x - 2 ** a))
         averages = [x + y for x, y in zip(averages, FPrate.get(closest))]
     averages[:] = [x / 7 for x in averages]
     print(averages)
 
 
-#froc_analyse('evaluation/OUTPUT/ens/froc_ensemble_bootstrapping.csv')
-#froc_analyse('C:/Users/Guido/Desktop/evaluationScript/out5/froc_ensemble_bootstrapping.csv')
+# froc_analyse('evaluation/OUTPUT/ens/froc_ensemble_bootstrapping.csv')
+# froc_analyse('C:/Users/Guido/Desktop/evaluationScript/out5/froc_ensemble_bootstrapping.csv')
 # label_csv('E:\uni\Medical\Project\CSVFILES\CSVFILES\AllUnet.csv')
 # candidates4 = ca.load_candidates('E:\uni\Medical\Project\CSVFILES\CSVFILES\AllUnet.csv', False)
 # pica.evaluate_candidates.run(candidates4)
@@ -191,14 +191,14 @@ def froc_analyse(csvfile):
 # annotations = 'E:/uni/Medical/Project/CSVFILES/CSVFILES/annotations.csv'
 # merge_pipe_and_unet(candidates,annotations, 2)
 # merge_candidates('E:\uni\Medical\Project\CSVFILES\CSVFILES\candidates_unet_final_45.csv', 2)
-#distance_lungonly_merge("../data/unet_candidates_noclose3/",'candidates_unet_final_01', 2)
-#distance_lungonly_merge("../data/unet_candidates_noclose3/",'candidates_unet_final_23', 2)
-#distance_lungonly_merge("../data/",'candidates_unet_final_45', 2)
+# distance_lungonly_merge("../data/unet_candidates_noclose3/",'candidates_unet_final_01', 2)
+# distance_lungonly_merge("../data/unet_candidates_noclose3/",'candidates_unet_final_23', 2)
+# distance_lungonly_merge("../data/",'candidates_unet_final_45', 2)
 distance_lungonly_merge("../data/", 'candidates_unet_ALL', 2)
-#distance_lungonly_merge("../data/",'candidates_unet_final_23', 2)
-#distance_lungonly_merge("../data/",'candidates_unet_final_67', 2)
-#distance_lungonly_merge("../data/",'candidates_unet_final_89', 2)
-#distance_lungonly_merge("../data/",'candidates_unet_final_45_ALL', 2)
-#distance_lungonly_merge("../data/unet_candidates_noclose3/",'candidates_unet_final_67', 2)
-#distance_lungonly_merge("../data/unet_candidates_noclose3/",'candidates_unet_final_89', 2)
-#merge_csv('../data/unet_final_outputs', '../data', 'AllUnet', '')
+# distance_lungonly_merge("../data/",'candidates_unet_final_23', 2)
+# distance_lungonly_merge("../data/",'candidates_unet_final_67', 2)
+# distance_lungonly_merge("../data/",'candidates_unet_final_89', 2)
+# distance_lungonly_merge("../data/",'candidates_unet_final_45_ALL', 2)
+# distance_lungonly_merge("../data/unet_candidates_noclose3/",'candidates_unet_final_67', 2)
+# distance_lungonly_merge("../data/unet_candidates_noclose3/",'candidates_unet_final_89', 2)
+# merge_csv('../data/unet_final_outputs', '../data', 'AllUnet', '')
