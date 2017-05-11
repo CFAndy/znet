@@ -9,7 +9,7 @@ import pickle
 import glob
 import os
 import scipy.misc
-from skimage.io import imread
+from skimage.io import imread, imsave
 from skimage import morphology
 from scipy import ndimage
 import cv2
@@ -24,6 +24,8 @@ from image_read_write import load_itk_image
 CANDIDATES_COLUMNS = ['seriesuid', 'coordX', 'coordY', 'coordZ', 'label']
 THRESHOLD = 225
 
+DEBUG = False
+
 def get_masks_path(mask_path, subsets):
     mask_paths = []
     for subset in subsets:
@@ -34,8 +36,9 @@ def get_masks_path(mask_path, subsets):
 
 def unet_candidates(padding = True):
     cur_dir = os.path.dirname(os.path.abspath(__file__))
-    cands = glob.glob(os.path.join(cur_dir, "../results/*/*.png"))
+    cands = glob.glob(os.path.join(cur_dir, "../results/subset[0-9]/*.png"))
     subsets = ['subset0', 'subset1', 'subset2', 'subset3', 'subset4', 'subset5', 'subset6', 'subset7', 'subset8', 'subset9']
+    # subsets = ['subset0', 'subset1']
     mask_paths = get_masks_path(os.path.join(cur_dir, "../data/1_1_1mm_slices_lung_masks"), subsets)
     data = []
     imname = ""
@@ -54,6 +57,15 @@ def unet_candidates(padding = True):
         image_eroded = morphology.binary_erosion(image_t, selem = selem)
 
         label_im, nb_labels = ndimage.label(image_eroded)
+
+        if DEBUG:
+            save_filename = os.path.join(cur_dir, "../data/erosion_images", os.path.split(name)[1])
+            save_im = label_im.copy()
+            save_im[np.where(save_im >= 1)] = 255
+            imsave(save_filename, save_im)
+            # print "nb labels: ", nb_labels
+            continue
+
         imname3 = os.path.split(name)[1].replace('.png', '')
         splitted = imname3.split("slice")
         slice_id = splitted[1]
