@@ -9,14 +9,15 @@ from params import wrn_params as P
 import caffe
 import os
 import sys
+from tqdm import tqdm
 
 def get_images_with_filenames(filenames):
     #### read a mini batch data
-    inputs, targets = load_images(filenames, deterministic=True)
+    inputs, targets = load_images(filenames, deterministic = True)
     new_inputs = []
     new_targets = []
     for image, target in zip(inputs, targets):
-        ims, trs = testtime_augmentation(image[0], target) #Take color channel of image
+        ims, trs = testtime_augmentation(image[0], target) # Take color channel of image
         new_inputs += ims
         new_targets += trs
     new_filenames = []
@@ -46,9 +47,9 @@ def main():
     all_probabilities = []
     all_filenames = []
     print('begin predicting...')
-    for i, batch in enumerate(gen):
+    for i, batch in tqdm(enumerate(gen)):
         data, label, fnames = batch
-        ### pass data and label to caff net, please set the batchszie to 12(atomic batchsize) for both prediction batch size and train batch size
+        ### pass data and label to caff net, please set the batch size to 12(atomic batchsize) for both prediction batch size and train batch size
         if data.shape[0] == batch_size:
             caffe_net.blobs['data'].data[...] = data.astype(np.float32, copy = False)
             caffe_net.blobs['label'].data[...] = label.astype(np.float32, copy = False)
@@ -70,13 +71,14 @@ def main():
     print('end predicting')
     print('write to csv')
     cur_dir = os.path.dirname(os.path.abspath(__file__))
-    candidates = pd.read_csv(os.path.join(cur_dir, './../../../data/candidates_V2.csv'))
+    candidates = pd.read_csv(os.path.join(cur_dir, './../../../data/finalizedcandidates_unet_01.csv'))
     data = []
     ### get the mean prob for each filename and get the row number of the candidate
     for x in d.iteritems():
         fname, probabilities = x
         prob = np.mean(probabilities)
         candidates_row = int(os.path.split(fname)[1].replace('.pkl.gz', '')) - 2
+        print candidates_row
         data.append(list(candidates.iloc[candidates_row].values)[: -1] + [str(prob)])
     ### write the prob to a .csv
     submission = pd.DataFrame(columns = ['seriesuid', 'coordX', 'coordY', 'coordZ', 'probability'], data = data)

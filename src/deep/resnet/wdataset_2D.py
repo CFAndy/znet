@@ -13,8 +13,8 @@ def load_images(image_paths, deterministic = False):
     labels = []
 
     for image_path in image_paths:
-        with gzip.open(image_path) as file:
-            xy_xz_yz = pickle.load(file)
+        with gzip.open(image_path) as f:
+            xy_xz_yz = pickle.load(f)
             x, y, z = xy_xz_yz
             if P.AUGMENT and not deterministic:
                 x, y, z = augment.augment(xy_xz_yz)
@@ -22,9 +22,9 @@ def load_images(image_paths, deterministic = False):
             offset = (len(x) - P.INPUT_SIZE) / 2
 
             if offset > 0:
-                x = x[offset:-offset, offset:-offset]
-                y = y[offset:-offset, offset:-offset]
-                z = z[offset:-offset, offset:-offset]
+                x = x[offset : -offset, offset : -offset]
+                y = y[offset : -offset, offset : -offset]
+                z = z[offset : -offset, offset : -offset]
 
             X.append([x])
             X.append([y])

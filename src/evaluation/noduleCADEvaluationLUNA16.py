@@ -36,7 +36,7 @@ def generateBootstrapSet(scanToCandidatesDict, FROCImList):
     imageLen = FROCImList.shape[0]
 
     # get a random list of images using sampling with replacement
-    rand_index_im   = np.random.randint(imageLen, size=imageLen)
+    rand_index_im   = np.random.randint(imageLen, size = imageLen)
     FROCImList_rand = FROCImList[rand_index_im]
 
     # get a new list of candidates
@@ -49,31 +49,30 @@ def generateBootstrapSet(scanToCandidatesDict, FROCImList):
             candidates = np.copy(scanToCandidatesDict[im])
             candidatesExists = True
         else:
-            candidates = np.concatenate((candidates,scanToCandidatesDict[im]),axis = 1)
+            candidates = np.concatenate((candidates, scanToCandidatesDict[im]), axis = 1)
 
     return candidates
 
 def compute_mean_ci(interp_sens, confidence = 0.95):
-    sens_mean = np.zeros((interp_sens.shape[1]),dtype = 'float32')
-    sens_lb   = np.zeros((interp_sens.shape[1]),dtype = 'float32')
-    sens_up   = np.zeros((interp_sens.shape[1]),dtype = 'float32')
+    sens_mean = np.zeros((interp_sens.shape[1]), dtype = 'float32')
+    sens_lb   = np.zeros((interp_sens.shape[1]), dtype = 'float32')
+    sens_up   = np.zeros((interp_sens.shape[1]), dtype = 'float32')
 
-    Pz = (1.0-confidence)/2.0
+    Pz = (1.0 - confidence) / 2.0
 
     for i in range(interp_sens.shape[1]):
         # get sorted vector
-        vec = interp_sens[:,i]
+        vec = interp_sens[:, i]
         vec.sort()
 
         sens_mean[i] = np.average(vec)
-        sens_lb[i] = vec[math.floor(Pz*len(vec))]
-        sens_up[i] = vec[math.floor((1.0-Pz)*len(vec))]
+        sens_lb[i] = vec[int(math.floor(Pz * len(vec)))]
+        sens_up[i] = vec[int(math.floor((1.0 - Pz) * len(vec)))]
 
-    return sens_mean,sens_lb,sens_up
+    return sens_mean, sens_lb, sens_up
 
-def computeFROC_bootstrap(FROCGTList,FROCProbList,FPDivisorList,FROCImList,excludeList,numberOfBootstrapSamples=1000, confidence = 0.95):
-
-    set1 = np.concatenate(([FROCGTList], [FROCProbList], [excludeList]), axis=0)
+def computeFROC_bootstrap(FROCGTList, FROCProbList, FPDivisorList, FROCImList, excludeList, numberOfBootstrapSamples = 1000, confidence = 0.95):
+    set1 = np.concatenate(([FROCGTList], [FROCProbList], [excludeList]), axis = 0)
 
     fps_lists = []
     sens_lists = []
@@ -86,30 +85,30 @@ def computeFROC_bootstrap(FROCGTList,FROCProbList,FPDivisorList,FROCImList,exclu
     scanToCandidatesDict = {}
     for i in range(len(FPDivisorList_np)):
         seriesuid = FPDivisorList_np[i]
-        candidate = set1[:,i:i+1]
+        candidate = set1[:, i : i+1]
 
         if seriesuid not in scanToCandidatesDict:
             scanToCandidatesDict[seriesuid] = np.copy(candidate)
         else:
-            scanToCandidatesDict[seriesuid] = np.concatenate((scanToCandidatesDict[seriesuid],candidate),axis = 1)
+            scanToCandidatesDict[seriesuid] = np.concatenate((scanToCandidatesDict[seriesuid], candidate), axis = 1)
 
     for i in range(numberOfBootstrapSamples):
-        print 'computing FROC: bootstrap %d/%d' % (i,numberOfBootstrapSamples)
+        print 'computing FROC: bootstrap %d/%d' % (i, numberOfBootstrapSamples)
         # Generate a bootstrapped set
-        btpsamp = generateBootstrapSet(scanToCandidatesDict,FROCImList_np)
-        fps, sens, thresholds = computeFROC(btpsamp[0,:],btpsamp[1,:],len(FROCImList_np),btpsamp[2,:])
+        btpsamp = generateBootstrapSet(scanToCandidatesDict, FROCImList_np)
+        fps, sens, thresholds = computeFROC(btpsamp[0, :], btpsamp[1, :], len(FROCImList_np), btpsamp[2, :])
 
         fps_lists.append(fps)
         sens_lists.append(sens)
         thresholds_lists.append(thresholds)
 
     # compute statistic
-    all_fps = np.linspace(FROC_minX, FROC_maxX, num=10000)
+    all_fps = np.linspace(FROC_minX, FROC_maxX, num = 10000)
 
     # Then interpolate all FROC curves at this points
-    interp_sens = np.zeros((numberOfBootstrapSamples,len(all_fps)), dtype = 'float32')
+    interp_sens = np.zeros((numberOfBootstrapSamples, len(all_fps)), dtype = 'float32')
     for i in range(numberOfBootstrapSamples):
-        interp_sens[i,:] = np.interp(all_fps, fps_lists[i], sens_lists[i])
+        interp_sens[i, :] = np.interp(all_fps, fps_lists[i], sens_lists[i])
 
     # compute mean and CI
     sens_mean,sens_lb,sens_up = compute_mean_ci(interp_sens, confidence = confidence)
@@ -137,8 +136,8 @@ def computeFROC(FROCGTList, FROCProbList, totalNumberOfImages, excludeList):
     sens = (tpr * numberOfDetectedLesions) / totalNumberOfLesions
     return fps, sens, thresholds
 
-def evaluateCAD(seriesUIDs, results, outputDir, allNodules, CADSystemName, maxNumberOfCADMarks=-1,
-                performBootstrapping=False,numberOfBootstrapSamples=1000,confidence = 0.95):
+def evaluateCAD(seriesUIDs, results, outputDir, allNodules, CADSystemName, maxNumberOfCADMarks = -1,
+                performBootstrapping = False, numberOfBootstrapSamples = 1000, confidence = 0.95):
     '''
     function to evaluate a CAD algorithm
     @param seriesUIDs: list of the seriesUIDs of the cases to be processed
@@ -155,7 +154,7 @@ def evaluateCAD(seriesUIDs, results, outputDir, allNodules, CADSystemName, maxNu
     nodOutputfile.write((60 * "*") + "\n")
     nodOutputfile.write("\n")
 
-    #results = csvTools.readCSV(results_filename)
+    # results = csvTools.readCSV(results_filename)
 
     allCandsCAD = {}
 
@@ -351,12 +350,12 @@ def evaluateCAD(seriesUIDs, results, outputDir, allNodules, CADSystemName, maxNu
     # Write FROC curve
     with open(os.path.join(outputDir, "froc_%s.txt" % CADSystemName), 'w') as f:
         for i in range(len(sens)):
-            f.write("%.9f,%.9f,%.9f\n" % (fps[i], sens[i], thresholds[i]))
+            f.write("%.9f, %.9f, %.9f\n" % (fps[i], sens[i], thresholds[i]))
 
     # Write FROC vectors to disk as well
     with open(os.path.join(outputDir, "froc_gt_prob_vectors_%s.csv" % CADSystemName), 'w') as f:
         for i in range(len(FROCGTList)):
-            f.write("%d,%.9f\n" % (FROCGTList[i], FROCProbList[i]))
+            f.write("%d, %.9f\n" % (FROCGTList[i], FROCProbList[i]))
 
     fps_itp = np.linspace(FROC_minX, FROC_maxX, num=10001)
 
@@ -365,9 +364,9 @@ def evaluateCAD(seriesUIDs, results, outputDir, allNodules, CADSystemName, maxNu
     if performBootstrapping:
         # Write mean, lower, and upper bound curves to disk
         with open(os.path.join(outputDir, "froc_%s_bootstrapping.csv" % CADSystemName), 'w') as f:
-            f.write("FPrate,Sensivity[Mean],Sensivity[Lower bound],Sensivity[Upper bound]\n")
+            f.write("FPrate, Sensivity[Mean], Sensivity[Lower bound], Sensivity[Upper bound]\n")
             for i in range(len(fps_bs_itp)):
-                f.write("%.9f,%.9f,%.9f,%.9f\n" % (fps_bs_itp[i], sens_bs_mean[i], sens_bs_lb[i], sens_bs_up[i]))
+                f.write("%.9f, %.9f, %.9f, %.9f\n" % (fps_bs_itp[i], sens_bs_mean[i], sens_bs_lb[i], sens_bs_up[i]))
     else:
         fps_bs_itp = None
         sens_bs_mean = None
@@ -380,12 +379,12 @@ def evaluateCAD(seriesUIDs, results, outputDir, allNodules, CADSystemName, maxNu
         fig1 = plt.figure()
         ax = plt.gca()
         clr = 'b'
-        plt.plot(fps_itp, sens_itp, color=clr, label="%s" % CADSystemName, lw=2)
+        plt.plot(fps_itp, sens_itp, color = clr, label="%s" % CADSystemName, lw = 2)
         if performBootstrapping:
-            plt.plot(fps_bs_itp, sens_bs_mean, color=clr, ls='--')
-            plt.plot(fps_bs_itp, sens_bs_lb, color=clr, ls=':') # , label = "lb")
-            plt.plot(fps_bs_itp, sens_bs_up, color=clr, ls=':') # , label = "ub")
-            ax.fill_between(fps_bs_itp, sens_bs_lb, sens_bs_up, facecolor=clr, alpha=0.05)
+            plt.plot(fps_bs_itp, sens_bs_mean, color = clr, ls = '--')
+            plt.plot(fps_bs_itp, sens_bs_lb, color = clr, ls = ':') # , label = "lb")
+            plt.plot(fps_bs_itp, sens_bs_up, color = clr, ls = ':') # , label = "ub")
+            ax.fill_between(fps_bs_itp, sens_bs_lb, sens_bs_up, facecolor = clr, alpha = 0.05)
         xmin = FROC_minX
         xmax = FROC_maxX
         plt.xlim(xmin, xmax)
@@ -396,16 +395,16 @@ def evaluateCAD(seriesUIDs, results, outputDir, allNodules, CADSystemName, maxNu
         plt.title('FROC performance - %s' % (CADSystemName))
 
         if bLogPlot:
-            plt.xscale('log', basex=2)
-            ax.xaxis.set_major_formatter(FixedFormatter([0.125,0.25,0.5,1,2,4,8]))
+            plt.xscale('log', basex = 2)
+            ax.xaxis.set_major_formatter(FixedFormatter([0.125, 0.25, 0.5, 1, 2, 4, 8]))
 
         # set your ticks manually
-        ax.xaxis.set_ticks([0.125,0.25,0.5,1,2,4,8])
+        ax.xaxis.set_ticks([0.125, 0.25, 0.5, 1, 2, 4, 8])
         ax.yaxis.set_ticks(np.arange(0, 1.1, 0.1))
-        plt.grid(b=True, which='both')
+        plt.grid(b = True, which = 'both')
         plt.tight_layout()
 
-        plt.savefig(os.path.join(outputDir, "froc_%s.png" % CADSystemName), bbox_inches=0, dpi=300)
+        plt.savefig(os.path.join(outputDir, "froc_%s.png" % CADSystemName), bbox_inches = 0, dpi = 300)
 
     return (fps, sens, thresholds, fps_bs_itp, sens_bs_mean, sens_bs_lb, sens_bs_up)
 
@@ -496,7 +495,7 @@ def collect(annotations_filename,annotations_excluded_filename,seriesuids_filena
     return (allNodules, seriesUIDs, results)
 
 
-def noduleCADEvaluation(results_filename,outputDir):
+def noduleCADEvaluation(results_filename, outputDir):
     '''
     function to load annotations and evaluate a CAD algorithm
     @param annotations_filename: list of annotations
@@ -516,17 +515,17 @@ def noduleCADEvaluation(results_filename,outputDir):
 
     (allNodules, seriesUIDs, results) = collect(annotations_filename, annotations_excluded_filename, seriesuids_filename,results_filename)
 
-    evaluateCAD(seriesUIDs, results, outputDir, allNodules, os.path.splitext(os.path.basename(results_filename))[0], maxNumberOfCADMarks=100, performBootstrapping=bPerformBootstrapping, numberOfBootstrapSamples=bNumberOfBootstrapSamples, confidence=bConfidence)
+    evaluateCAD(seriesUIDs, results, outputDir, allNodules, os.path.splitext(os.path.basename(results_filename))[0], maxNumberOfCADMarks = 100, performBootstrapping = bPerformBootstrapping, numberOfBootstrapSamples = bNumberOfBootstrapSamples, confidence = bConfidence)
 
     print "Finished!"
 
 if __name__ == '__main__':
     import time
-    #results_filename              = '../ensemble.csv'
-    #results_filename              = './predictions_subset3_epoch156_model1466567940_resnet_large.csv'
-    results_filename              = '../concat.csv'
+    # results_filename              = '../ensemble.csv'
+    # results_filename              = './predictions_subset3_epoch156_model1466567940_resnet_large.csv'
+    results_filename              = '../../data/submission_subset01.csv'
 
     outputDir                     = './OUTPUT/concat'
 
     # execute only if run as a script
-    noduleCADEvaluation(results_filename,outputDir)
+    noduleCADEvaluation(results_filename, outputDir)
