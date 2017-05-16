@@ -2,10 +2,10 @@ net: "../../../models/unet/unet_trainval.prototxt"
 solver_mode: CPU
 type: "Nesterov"
 test_iter: 200
-test_interval: 120
+test_interval: 10000
 test_initialization: false
 test_compute_loss: true
-display: 20 # 1550
+display: 100
 average_loss: 40
 base_lr: 0.0001
 lr_policy: "plateau"
@@ -15,5 +15,5 @@ momentum: 0.99
 regularization_type: "L2"
 weight_decay: 1e-5
 max_iter: 311061
-snapshot: 8000
+snapshot: 10000
 snapshot_prefix: "../../../snapshots/unet"

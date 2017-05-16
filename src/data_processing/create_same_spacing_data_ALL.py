@@ -142,16 +142,15 @@ def create_slices(imagePath, maskPath, cads):
 
 def createImageList(subset, cads):
     imagesWithNodules = []
-    subsetDir = 'data\\original_lungs\\subset{}'.format(subset)
+    subsetDir = '../../data/original_lungs/subset{}'.format(subset)
     imagePaths = glob.glob("{}/*.mhd".format(subsetDir))
     return imagePaths
 
 if __name__ == "__main__":
-    cads = pd.read_csv("csv\\annotations.csv")
+    cads = pd.read_csv(os.path.join("../../csv", "annotations.csv")
     for subset in range(10):
     	start_time = time.time()
         print '{} - Processing subset'.format(time.strftime("%H:%M:%S")), subset
         imagePaths = createImageList(subset, cads)
-        Parallel(n_jobs = 4)(delayed(create_slices)(imagePath, imagePath.replace('original_lungs\\subset{}'.format(subset), 'original_lung_masks'), cads) for imagePath in imagePaths)
+        Parallel(n_jobs = 4)(delayed(create_slices)(imagePath, imagePath.replace('original_lungs/subset{}'.format(subset), 'original_lung_masks'), cads) for imagePath in imagePaths)
         print '{} - Processing subset {} took {} seconds'.format(time.strftime("%H:%M:%S"), subset, np.floor(time.time() - start_time))
-        print
