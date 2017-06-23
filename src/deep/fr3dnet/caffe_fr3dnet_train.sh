@@ -12,14 +12,17 @@ echo $PYTHONPATH
 
 export GLOG_minloglevel=2
 
+core_num=`nproc`
+
 unset OMP_NUM_THREADS
-# export OMP_NUM_THREADS=44
-# export MKL_NUM_THREADS
+export OMP_NUM_THREADS=${core_num}
+export MKL_NUM_THREADS=${core_num}
+# export OMP_DYNAMIC="False"
 
 # export OMP_WAIT_POLICY=passive
 unset MKL_THREADING_LAYER
 # export MKL_THREADING_LAYER=gnu
-# export KMP_AFFINITY=compact,1,0,granularity=fine
+export KMP_AFFINITY=compact,1,0,granularity=fine
 
 solver_proto="${cur_dir}/../../../models/fr3dnet/fr3dnet_solver.prototxt"
 ../../../caffe/build/tools/caffe train --solver=${solver_proto}

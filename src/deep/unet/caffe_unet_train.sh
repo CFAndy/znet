@@ -1,5 +1,4 @@
 #!/bin/bash
-
 cur_dir=$(cd "$(dirname $0)";pwd)
 # echo ${cur_dir}
 znet_path="${cur_dir}/../"
@@ -12,9 +11,12 @@ echo $PYTHONPATH
 
 export GLOG_minloglevel=2
 
+core_num=`nproc`
+
 unset OMP_NUM_THREADS
-export OMP_NUM_THREADS=44
-# export MKL_NUM_THREADS
+export OMP_NUM_THREADS=${core_num}
+export MKL_NUM_THREADS=${core_num}
+# export OMP_DYNAMIC="False"
 
 # export OMP_WAIT_POLICY=passive
 unset MKL_THREADING_LAYER
