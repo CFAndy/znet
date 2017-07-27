@@ -9,6 +9,9 @@ caffe_path="${cur_dir}/../../../caffe/python"
 export PYTHONPATH=${znet_path}:${caffe_path}:$PYTHONPATH
 echo $PYTHONPATH
 
+mkldnn_path="${cur_dir}/../../../caffe/external/mkldnn/install/lib"
+export LD_LIBRARY_PATH=${mkldnn_path}:$LD_LIBRARY_PATH
+
 export GLOG_minloglevel=2
 
 core_num=`nproc`
