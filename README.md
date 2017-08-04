@@ -1,18 +1,16 @@
 # luna16
-LUNA16 Lung Nodule Analysis - NWI-IMC037 Final Project 
+LUNA16 Lung Nodule Analysis 
 
-Respository containing code for our final project of the computer aided medical diagnosis course, which yielded an entry in the LUNA16 competition. 
-Unfortunately this project is ill documented, as it was created very quickly and pragmatically as we hurried to meet deadlines for the university course this was the main project of. Running it will likely require minor edits left and right (mostly to do with filepaths), unless you place the data in the same folder as we did. 
+Respository containing code to port [ZNet Solution](https://github.com/gzuidhof/luna16) to CAFFE frameowrk.
 
 A rough list of requirements:
 
-**Python 2.7** with `theano, lasagne (with CUDNN configured), tqdm, pandas, numpy, scipy, scikit-image, scikit-learn, opencv2`.
+**Python 2.7** with `tqdm, pandas, numpy, scipy, scikit-image, scikit-learn, opencv2` and CAFFE.
 
 ## UNET for dense prediction
 
 ### Preprocessing
 Convert data to 1x1x1mm_512x512 slices. A requirement is also a set of segmentations of the lungs (can be found on the LUNA16 website). Place your data in folder `data/original_lungs`:
-
 
 Use script `src/data_processing/create_same_spacing_data_NODULE.py`, this may take a long time (up to 24 hours) depending on your machine.
 
@@ -23,7 +21,7 @@ Then, download `imagename_zspacing.csv` from [here](https://gzuidhof.stackstorag
 src/deep/unet/caffe_unet_train.sh
 ```
 
-Parameter config is in params.py
+Parameter configurations is in params.py
 
 ### Unet held out set dense predictions
 ```
